@@ -61,14 +61,22 @@ else:
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         # Display user profile
-        st.markdown(f"### {user.get('name', 'Unknown')}")
-        st.write(f"**Major:** {user.get('major', 'N/A')}")
-        st.write(f"**Year:** {user.get('year', 'N/A')}")
-        st.write(f"**Skills:** {user.get('skills', 'N/A')}")
-        st.write(f"**Interests:** {user.get('interests', 'N/A')}")
-        st.info(f"✨ {user.get('x_factor', 'No special skill listed')}")
-
-        st.markdown("---")
+        st.markdown(f"""
+        <div class="swipe-card">
+            <div class="user-header">
+                <h3>{user.get('name', 'Unknown')}</h3>
+            </div>
+            <div class="user-details">
+                <p><strong>Major:</strong> {user.get('major', 'N/A')}</p>
+                <p><strong>Year:</strong> {user.get('year', 'N/A')}</p>
+                <p><strong>Skills:</strong> {user.get('skills', 'N/A')}</p>
+                <p><strong>Interests:</strong> {user.get('interests', 'N/A')}</p>
+            </div>
+            <div class="x-factor">
+                ✨ {user.get('x_factor', 'No special skill listed')}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
         # Swipe buttons
         col_left, col_right = st.columns(2)
@@ -118,6 +126,7 @@ st.caption("Connect with students to learn new skills or teach what you know")
 col_teach, col_learn = st.columns(2)
 
 with col_teach:
+    st.markdown('<div class="skill-card teach">', unsafe_allow_html=True)
     st.markdown("### 📚 Skills Available to Learn")
     # Loop through all users
     # Extract and display skills from 'can_teach' field
@@ -128,8 +137,10 @@ with col_teach:
             skills = user.get('can_teach', '').split(',')
             for skill in skills:
                 st.write(f"• **{skill.strip()}** - {user.get('name')} ({user.get('email')})")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with col_learn:
+    st.markdown('<div class="skill-card learn">', unsafe_allow_html=True)
     st.markdown("### 🎯 Skills People Want to Learn")
     # Loop through all users
     # Extract and display skills from 'wants_to_learn' field
@@ -140,6 +151,7 @@ with col_learn:
             skills = user.get('wants_to_learn', '').split(',')
             for skill in skills:
                 st.write(f"• **{skill.strip()}** - {user.get('name')}")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Bonus filters
 st.sidebar.markdown("---")

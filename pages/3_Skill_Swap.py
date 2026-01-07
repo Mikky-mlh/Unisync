@@ -25,27 +25,29 @@ st.markdown("---")
 st.subheader("📝 Quick Skill Post")
 st.caption("Post a skill you can teach or want to learn")
 
+st.markdown('<div class="skill-form">', unsafe_allow_html=True)
 with st.form("post_skill"):
     col1, col2 = st.columns(2)
-    
+
     with col1:
         skill_name = st.text_input("🎯 Skill Name", placeholder="e.g., Python Programming")
         skill_type = st.radio("Type", ["I can teach this", "I want to learn this"])
-    
+
     with col2:
         category = st.selectbox("📚 Category", ["Tech", "Language", "Art", "Music", "Sports", "Academic", "Other"])
         level = st.select_slider("Level", ["Beginner", "Intermediate", "Advanced"])
-    
+
     description = st.text_area("📝 Description (optional)", placeholder="Tell us more about this skill...")
-    
+
     submit = st.form_submit_button("🚀 Post Skill", type="primary", use_container_width=True)
-    
+
     if submit and skill_name:
         st.success(f"✅ Skill '{skill_name}' posted successfully!")
         st.balloons()
         st.info("💡 In the full app, this would be saved to the database and shown to other students.")
     elif submit:
         st.error("⚠️ Please enter a skill name")
+st.markdown('</div>', unsafe_allow_html=True)
 
 # Show some example skills
 st.markdown("---")
@@ -54,25 +56,37 @@ st.subheader("🌟 Trending Skills")
 col1, col2, col3 = st.columns(3)
 with col1:
     st.markdown("""
-    **💻 Tech Skills**
-    - Python Programming (Yuvraj)
-    - Web Development (Siddhika)
-    - Data Analysis (Aaradhya)
-    - Machine Learning (Yuvraj)
-    """)
+    <div class="column">
+    <h4>💻 Tech Skills</h4>
+    <ul>
+    <li>Python Programming (Yuvraj)</li>
+    <li>Web Development (Siddhika)</li>
+    <li>Data Analysis (Aaradhya)</li>
+    <li>Machine Learning (Yuvraj)</li>
+    </ul>
+    </div>
+    """, unsafe_allow_html=True)
 with col2:
     st.markdown("""
-    **🎵 Creative Skills**
-    - Guitar Playing (Aaradhya)
-    - Digital Art (Siddhika)
-    - Photography (Yuvraj)
-    - Video Editing (Siddhika)
-    """)
+    <div class="column">
+    <h4>🎵 Creative Skills</h4>
+    <ul>
+    <li>Guitar Playing (Aaradhya)</li>
+    <li>Digital Art (Siddhika)</li>
+    <li>Photography (Yuvraj)</li>
+    <li>Video Editing (Siddhika)</li>
+    </ul>
+    </div>
+    """, unsafe_allow_html=True)
 with col3:
     st.markdown("""
-    **📚 Academic Skills**
-    - Calculus Tutoring (Yuvraj)
-    - Essay Writing (Siddhika)
-    - Public Speaking (Aaradhya)
-    - Research Methods (Yuvraj)
-    """)
+    <div class="column">
+    <h4>📚 Academic Skills</h4>
+    <ul>
+    <li>Calculus Tutoring (Yuvraj)</li>
+    <li>Essay Writing (Siddhika)</li>
+    <li>Public Speaking (Aaradhya)</li>
+    <li>Research Methods (Yuvraj)</li>
+    </ul>
+    </div>
+    """, unsafe_allow_html=True)

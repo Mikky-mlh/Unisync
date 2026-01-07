@@ -81,37 +81,29 @@ if not listings:
     st.warning("😕 No listings available yet. Be the first to post!")
 else:
     # Display listings in a 3-column grid
+    st.markdown('<div class="listings-grid">', unsafe_allow_html=True)
     cols = st.columns(3)
     for idx, listing in enumerate(listings):
         with cols[idx % 3]:
             # Card container
             st.markdown(f"""
-            <div style="
-                border: 2px solid #e0e0e0;
-                border-radius: 15px;
-                padding: 1.5rem;
-                margin-bottom: 1rem;
-                background: white;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            ">
-                <span style="background: #4f46e5; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">
-                    {listing.get('type', 'other').upper()}
-                </span>
-                <span style="background: #10b981; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold; margin-left: 0.5rem;">
-                    {listing.get('status', 'available').upper()}
-                </span>
+            <div class="listing-card">
+                <div class="listing-header">
+                    <span class="listing-type">{listing.get('type', 'other').upper()}</span>
+                    <span class="listing-status">{listing.get('status', 'available').upper()}</span>
+                </div>
+                <h3 class="listing-title">{listing.get('title', 'Untitled')}</h3>
+                <p class="listing-desc">{listing.get('description', 'No description')}</p>
+                <div class="listing-details">
+                    <p>📍 <strong>Location:</strong> {listing.get('location', 'Not specified')}</p>
+                    <p>💰 <strong>Price:</strong> {listing.get('price', 'Contact for price')}</p>
+                </div>
             </div>
             """, unsafe_allow_html=True)
 
-            st.markdown(f"### {listing.get('title', 'Untitled')}")
-            st.write(listing.get('description', 'No description'))
-            st.markdown(f"📍 **Location:** {listing.get('location', 'Not specified')}")
-            st.markdown(f"💰 **Price:** {listing.get('price', 'Contact for price')}")
-
             if st.button("👋 I'm Interested", key=f"interest_{listing.get('id')}", use_container_width=True):
                 st.success("✅ Interest registered! Contact info would be shown here.")
-
-            st.markdown("---")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Form to post new listing
 st.markdown("---")
