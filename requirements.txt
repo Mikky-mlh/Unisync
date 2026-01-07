@@ -1,5 +1,8 @@
 streamlit
+streamlit-lottie
 pandas
 google-generativeai
+Pillow
 plotly
-faker  # To generate fake users for the demo!
+python-dotenv
+faker  # To generate fake users for the demo
