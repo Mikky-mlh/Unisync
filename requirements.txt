@@ -1,0 +1,5 @@
+streamlit
+pandas
+google-generativeai
+plotly
+faker  # To generate fake users for the demo!
