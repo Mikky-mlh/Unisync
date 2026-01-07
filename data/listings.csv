@@ -1,0 +1,3 @@
+id,user_id,type,title,description,location,price,status
+1,2,furniture,Study Desk with Chair,"Good condition, moving out","Dorm B, Block 3",Free,available
+2,1,room,Room available for sharing,"Private room in 3BHK, near campus",10 min from college,$300/month,available

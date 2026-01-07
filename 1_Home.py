@@ -1,6 +1,9 @@
 import streamlit as st
-from src.data_manager import load_users, load_listings
+from src.data_manager import load_users, load_listings, init_data
 from src.ai_matcher import ai_assistant
+
+# Initialize data
+init_data()
 import json
 from streamlit_lottie import st_lottie
 
