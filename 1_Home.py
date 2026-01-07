@@ -1,5 +1,5 @@
 import streamlit as st
-from src.data_manager import load_users, load_listings, init_data
+from src.data_manager import load_users, load_listings, init_data, save_user, verify_password, save_password
 from src.ai_matcher import ai_assistant
 
 # Initialize data
@@ -12,7 +12,7 @@ st.set_page_config(
     page_title="Uni-Sync - Connect & Collaborate",
     page_icon="🤝",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # Initialize session state
@@ -29,6 +29,170 @@ try:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 except FileNotFoundError:
     pass
+
+# SIDEBAR - User Profile
+with st.sidebar:
+    st.image("https://cdn-icons-png.flaticon.com/512/476/476863.png", width=80)
+    st.title("👤 User Profile")
+    
+    # Simple Login System
+    users = load_users()
+    
+    # Login Form
+    if st.session_state.current_user is None:
+        st.subheader("🔑 Login")
+        with st.form("login_form"):
+            login_email = st.text_input("Email")
+            login_password = st.text_input("Password", type="password")
+            
+            if st.form_submit_button("🚀 Login", type="primary"):
+                if verify_password(login_email, login_password):
+                    # Find user by email
+                    current_user = next((u for u in users if u.get('email', '').lower() == login_email.lower()), None)
+                    if current_user:
+                        st.session_state.current_user = current_user
+                        st.success(f"Welcome back, {current_user.get('name')}!")
+                        st.rerun()
+                    else:
+                        st.error("⚠️ User not found")
+                else:
+                    st.error("⚠️ Invalid email or password")
+    else:
+        # Show logged-in user info
+        current_user = st.session_state.current_user
+        st.success(f"Welcome, {current_user.get('name')}!")
+        st.caption(f"🎓 {current_user.get('major', 'Student')}")
+        st.caption(f"✨ {current_user.get('x_factor', '')}")
+        
+        if st.button("🚪 Logout", use_container_width=True):
+            st.session_state.current_user = None
+            st.rerun()
+        
+    st.divider()
+    
+    # "Join Now" Expander
+    with st.expander("📝 New? Join UniSync"):
+        # STEP 1: Put the decision OUTSIDE the form so it updates instantly
+        x_factor_type = st.radio(
+            "Can you teach something?", 
+            ["Yes, I can teach", "Currently a learner only"],
+            horizontal=True
+        )
+
+        # STEP 2: Start the form
+        with st.form("signup_form"):
+            new_name = st.text_input("Full Name *")
+            new_email = st.text_input("Email ID *", placeholder="your.email@campus.edu")
+            
+            c1, c2 = st.columns(2)
+            with c1:
+                new_year = st.selectbox("Year *", ["1st Year", "2nd Year", "3rd Year", "4th Year", "Alumni"])
+            with c2:
+                new_major = st.text_input("Major *")
+            
+            new_skills = st.text_input("Skills (comma separated) *")
+            new_interests = st.text_input("Interests (comma separated) *")
+            
+            # STEP 3: Conditionally show fields based on the outside selection
+            new_x_factor = ""
+            new_can_teach = ""
+            
+            if x_factor_type == "Yes, I can teach":
+                st.markdown("---")
+                st.markdown("### 👨‍🏫 Teacher Details")
+                new_x_factor = st.text_input("Your X-Factor (What makes you unique?) *")
+                new_can_teach = st.text_input("What can you teach? (comma separated) *")
+            else:
+                # Set default values for learners so logic doesn't break
+                new_x_factor = "📚 Currently a learner only"
+                new_can_teach = "None yet"
+
+            st.markdown("---")
+            new_wants_to_learn = st.text_input("What do you want to learn? (comma separated)")
+            new_accommodation = st.text_input("Accommodation needs (optional)", placeholder="e.g., Looking for roommate")
+            
+            c3, c4 = st.columns(2)
+            with c3:
+                new_password = st.text_input("Create Password *", type="password")
+            with c4:
+                new_password_confirm = st.text_input("Confirm Password *", type="password")
+
+            st.caption("* Required fields")
+
+            # STEP 4: Submit Logic
+            if st.form_submit_button("Join Network", type="primary"):
+                # Validate all required fields
+                if not new_name or not new_email or not new_major or not new_skills or not new_interests:
+                    st.error("⚠️ Please fill in all required fields")
+                elif not new_password or not new_password_confirm:
+                    st.error("⚠️ Please create and confirm your password")
+                elif new_password != new_password_confirm:
+                    st.error("⚠️ Passwords do not match!")
+                elif len(new_password) < 6:
+                    st.error("⚠️ Password must be at least 6 characters long")
+                # Only validate X-Factor if they claimed to be a teacher
+                elif x_factor_type == "Yes, I can teach" and (not new_x_factor or not new_can_teach):
+                    st.error("⚠️ Please enter your X-Factor and what you can teach")
+                else:
+                    # Check if email already exists
+                    existing_emails = [u.get('email', '').lower() for u in users]
+                    if new_email.lower() in existing_emails:
+                        st.error("⚠️ This email is already registered! Please use a different email or sign in.")
+                    else:
+                        # Create user dict matching CSV structure
+                        new_user = {
+                            "id": len(users) + 1,
+                            "name": new_name,
+                            "email": new_email,
+                            "year": new_year,
+                            "major": new_major,
+                            "skills": new_skills,
+                            "interests": new_interests,
+                            "x_factor": new_x_factor,
+                            "can_teach": new_can_teach,
+                            "wants_to_learn": new_wants_to_learn if new_wants_to_learn else "Open to learning",
+                            "accommodation_need": new_accommodation if new_accommodation else "None"
+                        }
+                        save_user(new_user)
+                        save_password(new_email, new_password)
+                        st.success("✅ Welcome to UniSync! You can now login with your credentials.")
+                        st.balloons()
+    
+    # Edit Profile for logged-in users
+    if st.session_state.current_user is not None:
+        st.divider()
+        with st.expander("✏️ Edit My Profile"):
+            current_user = st.session_state.current_user
+            with st.form("edit_profile_form"):
+                edit_skills = st.text_input("Update Skills", value=current_user.get('skills', ''))
+                edit_interests = st.text_input("Update Interests", value=current_user.get('interests', ''))
+                
+                # X-Factor edit with learner-only option
+                current_x = current_user.get('x_factor', '')
+                current_can_teach = current_user.get('can_teach', '')
+                
+                if "learner only" in current_x.lower() or current_can_teach == "None yet":
+                    edit_x_type = st.radio("Teaching Status", ["Currently a learner only", "Yes, I can teach"], index=0)
+                else:
+                    edit_x_type = st.radio("Teaching Status", ["Yes, I can teach", "Currently a learner only"], index=0)
+                
+                if edit_x_type == "Yes, I can teach":
+                    edit_x_factor = st.text_input("Your X-Factor", value=current_x if "learner only" not in current_x.lower() else "")
+                    edit_can_teach = st.text_input("What can you teach?", value=current_can_teach if current_can_teach != "None yet" else "")
+                else:
+                    edit_x_factor = "📚 Currently a learner only"
+                    edit_can_teach = "None yet"
+                
+                edit_wants_to_learn = st.text_input("What do you want to learn?", value=current_user.get('wants_to_learn', ''))
+                
+                if st.form_submit_button("💾 Save Changes", type="primary"):
+                    if not edit_skills or not edit_interests:
+                        st.error("⚠️ Skills and Interests cannot be empty")
+                    elif edit_x_type == "Yes, I can teach" and (not edit_x_factor or not edit_can_teach):
+                        st.error("⚠️ Please enter your X-Factor and what you can teach")
+                    else:
+                        st.success("✅ Profile updated! (In full app, this would update the CSV)")
+                        st.info("💡 Refresh the page to see changes")
 
 # Main content container
 st.markdown('<div class="main-content">', unsafe_allow_html=True)
