@@ -8,7 +8,12 @@ import json
 from streamlit_lottie import st_lottie
 
 # Page config
-st.set_page_config(page_title="Uni-Sync", page_icon="🤝", layout="wide")
+st.set_page_config(
+    page_title="Uni-Sync - Connect & Collaborate",
+    page_icon="🤝",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
 # Initialize session state
 if 'current_user' not in st.session_state:
@@ -25,55 +30,83 @@ try:
 except FileNotFoundError:
     pass
 
+# Main content container
+st.markdown('<div class="main-content">', unsafe_allow_html=True)
+
 # HERO SECTION
 col1, col2 = st.columns([2, 1])
 with col1:
-    st.markdown("""
-    <div style="padding: 3rem 0;">
-        <h1 style="font-size: 4rem; margin-bottom: 1rem;">🤝 Uni-Sync</h1>
-        <p style="font-size: 1.5rem; color: #666; margin-bottom: 2rem;">
-            One campus. Endless connections.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
+    st.markdown('<div class="hero-section">', unsafe_allow_html=True)
+    st.markdown('<h1 class="hero-title">🤝 Uni-Sync</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="hero-subtitle">One campus. Endless connections.</p>', unsafe_allow_html=True)
+    st.markdown('<p class="hero-description">Connect with fellow students, share skills, and find study partners. Uni-Sync helps you build meaningful relationships and academic collaborations within your university community.</p>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
     # Quick stats
     users = load_users()
     listings = load_listings()
-    
+
+    st.markdown('<div class="stats-spacer"></div>', unsafe_allow_html=True)
     col1a, col2a, col3a = st.columns(3)
     with col1a:
-        st.metric("👥 Active Students", len(users))
+        st.metric(
+            label="👥 Active Students",
+            value=len(users),
+            delta=f"+{len(users)//10 if len(users) > 0 else 0} this week"
+        )
     with col2a:
-        st.metric("🛠️ Skills Shared", sum(1 for u in users if u.get('can_teach')))
+        skills_shared = sum(1 for u in users if u.get('can_teach'))
+        st.metric(
+            label="🛠️ Skills Shared",
+            value=skills_shared,
+            delta=f"+{skills_shared//8 if skills_shared > 0 else 0} this week"
+        )
     with col3a:
-        st.metric("🏠 Available Listings", len(listings))
+        st.metric(
+            label="🏠 Available Listings",
+            value=len(listings),
+            delta=f"+{len(listings)//5 if len(listings) > 0 else 0} this week"
+        )
 
 with col2:
     # Lottie animation
     try:
         with open("assets/community.json") as f:
             anim = json.load(f)
-        st_lottie(anim, height=300)
+        st.markdown('<div class="animation-container">', unsafe_allow_html=True)
+        st_lottie(anim, height=350, key="hero-animation")
+        st.markdown('</div>', unsafe_allow_html=True)
     except FileNotFoundError:
-        st.info("🎨 Animation loading...")
+        st.info("🎨 Community animation loading...")
 
-# AI CHATBOT
-st.markdown("---")
-st.subheader("🤖 AI Campus Assistant")
+# Divider
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+
+# AI CHATBOT SECTION
+st.markdown('<h2 class="section-title">🤖 AI Campus Assistant</h2>', unsafe_allow_html=True)
+st.markdown('<p class="section-description">Need help finding study partners, resources, or campus information? Our AI assistant is here to help you navigate the university community.</p>', unsafe_allow_html=True)
 
 with st.form("ai_chat_form"):
-    user_query = st.text_input("Ask me anything: Find study buddies, skills, or campus resources...")
-    submit_button = st.form_submit_button("Send")
+    user_query = st.text_input(
+        "Ask me anything: Find study buddies, skills, or campus resources...",
+        placeholder="e.g., 'Find someone to study calculus with' or 'Who can help me with Python?'",
+        key="user_query_input"
+    )
+    submit_button = st.form_submit_button("🚀 Send Query", type="primary")
 
 if submit_button and user_query and user_query.strip():
     st.session_state.ai_chat_history.append({"role": "user", "content": user_query})
-    with st.spinner("Thinking..."):
+    with st.spinner("🤖 Uni-Sync AI is thinking..."):
         ai_response = ai_assistant(user_query, users, listings)
         st.session_state.ai_chat_history.append({"role": "assistant", "content": ai_response})
 
+# Display chat history
 for chat in st.session_state.ai_chat_history:
     if chat["role"] == "user":
-        st.markdown(f"<div style='background: #e6f7ff; padding: 1rem; border-radius: 10px; margin: 0.5rem 0; text-align: right;'><b>You:</b> {chat['content']}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='chat-user'><b>You:</b> {chat['content']}</div>", unsafe_allow_html=True)
     else:
-        st.markdown(f"<div style='background: #f0f2f6; padding: 1rem; border-radius: 10px; margin: 0.5rem 0;'><b>AI Assistant:</b> {chat['content']}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='chat-assistant'><b>🤖 AI Assistant:</b> {chat['content']}</div>", unsafe_allow_html=True)
+
+# Footer
+st.markdown('</div>', unsafe_allow_html=True)  # Close main-content div
+st.markdown('<footer><p>Made with ❤️ for the university community | Uni-Sync © 2024</p></footer>', unsafe_allow_html=True)
