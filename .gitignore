@@ -210,3 +210,4 @@ __marimo__/
 .streamlit/secrets.toml
 .env
 secrets.toml
+data/passwords.csv
