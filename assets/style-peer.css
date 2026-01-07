@@ -1,0 +1,79 @@
+/* Find Peers page styling */
+
+/* Swipe card */
+.swipe-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    margin: 2rem auto;
+    max-width: 500px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border: 3px solid #4F46E5;
+    text-align: center;
+}
+
+.user-header {
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.user-header h3 {
+    color: #1F2937;
+    font-size: 1.8rem;
+    margin: 0;
+}
+
+.user-details {
+    text-align: left;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin: 1rem 0;
+}
+
+.x-factor {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: 10px;
+    margin: 1rem 0;
+    font-weight: bold;
+}
+
+/* Skill cards */
+.skill-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border-left: 5px solid;
+}
+
+.skill-card.teach {
+    border-left-color: #10B981;
+}
+
+.skill-card.learn {
+    border-left-color: #3B82F6;
+}
+
+.contact-btn {
+    display: inline-block;
+    background: #4F46E5;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-top: 1rem;
+    font-weight: bold;
+}
+
+/* Swipe buttons */
+.stButton > button {
+    border-radius: 12px;
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
