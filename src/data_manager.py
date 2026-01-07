@@ -91,3 +91,31 @@ def save_user(user_data):
     df = pd.concat([df, pd.DataFrame([user_data])], ignore_index=True)
     df.to_csv("data/users.csv", index=False)
     return new_id
+
+def load_passwords():
+    """Load passwords from CSV"""
+    try:
+        if os.path.exists("data/passwords.csv"):
+            return pd.read_csv("data/passwords.csv").to_dict('records')
+    except:
+        pass
+    return []
+
+def save_password(email, password):
+    """Add new password to CSV"""
+    if os.path.exists("data/passwords.csv"):
+        df = pd.read_csv("data/passwords.csv")
+    else:
+        df = pd.DataFrame(columns=['email', 'password'])
+    
+    new_entry = pd.DataFrame([{'email': email, 'password': password}])
+    df = pd.concat([df, new_entry], ignore_index=True)
+    df.to_csv("data/passwords.csv", index=False)
+
+def verify_password(email, password):
+    """Verify if email and password match"""
+    passwords = load_passwords()
+    for entry in passwords:
+        if entry.get('email', '').lower() == email.lower() and entry.get('password') == password:
+            return True
+    return False

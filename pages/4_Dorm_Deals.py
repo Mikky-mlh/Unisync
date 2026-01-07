@@ -15,8 +15,12 @@ import os
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.data_manager import load_listings
+from src.data_manager import load_listings, load_users
 import pandas as pd
+
+# Initialize session state if not already done
+if 'current_user' not in st.session_state:
+    st.session_state.current_user = None
 
 # Setup page configuration
 st.set_page_config(page_title="Dorm Deals", page_icon="🏢", layout="wide")
@@ -33,8 +37,14 @@ st.title("🏢 Dorm Deals")
 st.markdown("### Your campus marketplace for rooms, furniture, and resources")
 st.caption("💡 Find great deals or post items you want to sell/give away")
 
-# Load all listings from CSV
+# Load all listings and users from CSV
 listings = load_listings()
+users = load_users()
+
+# Create a mapping from user_id to user info for easy lookup
+user_map = {}
+for user in users:
+    user_map[user['id']] = user
 
 # Sidebar filters
 st.sidebar.title("🔍 Filters")
@@ -85,6 +95,10 @@ else:
     cols = st.columns(3)
     for idx, listing in enumerate(listings):
         with cols[idx % 3]:
+            # Get the user who posted this listing
+            poster_user = user_map.get(listing.get('user_id'))
+            poster_name = poster_user.get('name', 'Anonymous') if poster_user else 'Unknown'
+
             # Card container
             st.markdown(f"""
             <div class="listing-card">
@@ -95,6 +109,7 @@ else:
                 <h3 class="listing-title">{listing.get('title', 'Untitled')}</h3>
                 <p class="listing-desc">{listing.get('description', 'No description')}</p>
                 <div class="listing-details">
+                    <p>👤 <strong>Posted by:</strong> {poster_name}</p>
                     <p>📍 <strong>Location:</strong> {listing.get('location', 'Not specified')}</p>
                     <p>💰 <strong>Price:</strong> {listing.get('price', 'Contact for price')}</p>
                 </div>
@@ -110,40 +125,46 @@ st.markdown("---")
 st.subheader("📝 Post Your Own Listing")
 st.caption("Have something to sell or give away? List it here!")
 
-with st.form("post_listing_form"):
-    col1, col2 = st.columns(2)
+# Check if user is logged in
+if 'current_user' not in st.session_state or st.session_state.current_user is None:
+    st.info("🔒 Please log in to post a listing. Visit the home page to login.")
+else:
+    with st.form("post_listing_form"):
+        col1, col2 = st.columns(2)
 
-    with col1:
-        title = st.text_input("🏷️ Title *", placeholder="e.g., Study Desk with Chair")
-        listing_type = st.selectbox("📊 Type *", ["room", "furniture", "textbook", "electronics", "other"])
-        price = st.text_input("💰 Price", placeholder="e.g., $50 or Free")
+        with col1:
+            title = st.text_input("🏷️ Title *", placeholder="e.g., Study Desk with Chair")
+            listing_type = st.selectbox("📊 Type *", ["room", "furniture", "textbook", "electronics", "other"])
+            price = st.text_input("💰 Price", placeholder="e.g., ₹500 or Free")
 
-    with col2:
-        location = st.text_input("📍 Location", placeholder="e.g., Dorm B, Room 301")
-        contact = st.text_input("📧 Contact Email", placeholder="your.email@campus.edu")
+        with col2:
+            location = st.text_input("📍 Location", placeholder="e.g., Boys Hostel, Room 301")
+            contact = st.text_input("📧 Contact Email", value=st.session_state.current_user.get('email', ''), placeholder="your.email@iitd.ac.in")
 
-    description = st.text_area("📝 Description", placeholder="Describe your item, its condition, etc.", height=100)
+        description = st.text_area("📝 Description", placeholder="Describe your item, its condition, etc.", height=100)
 
-    st.caption("* Required fields")
+        st.caption("* Required fields")
 
-    submit_button = st.form_submit_button("🚀 Post Listing", type="primary", use_container_width=True)
+        submit_button = st.form_submit_button("🚀 Post Listing", type="primary", use_container_width=True)
 
-    if submit_button:
-        # Validate inputs
-        if not title or not listing_type:
-            st.error("⚠️ Please fill in all required fields (Title and Type)")
-        else:
-            st.success(f"✅ Listing '{title}' posted successfully!")
-            st.balloons()
-            st.info("💡 In the full app, this would be saved to listings.csv and shown to all users.")
+        if submit_button:
+            # Validate inputs
+            if not title or not listing_type:
+                st.error("⚠️ Please fill in all required fields (Title and Type)")
+            else:
+                # In a real app, we would save the listing with the current user's ID
+                st.success(f"✅ Listing '{title}' posted successfully!")
+                st.balloons()
+                st.info("💡 In the full app, this would be saved to listings.csv and shown to all users.")
 
-            # Show preview of what was submitted
-            with st.expander("👁️ Preview Your Listing"):
-                st.markdown(f"**Title:** {title}")
-                st.markdown(f"**Type:** {listing_type}")
-                st.markdown(f"**Price:** {price if price else 'Not specified'}")
-                st.markdown(f"**Location:** {location if location else 'Not specified'}")
-                st.markdown(f"**Description:** {description if description else 'No description'}")
+                # Show preview of what was submitted
+                with st.expander("👁️ Preview Your Listing"):
+                    st.markdown(f"**Title:** {title}")
+                    st.markdown(f"**Type:** {listing_type}")
+                    st.markdown(f"**Price:** {price if price else 'Not specified'}")
+                    st.markdown(f"**Location:** {location if location else 'Not specified'}")
+                    st.markdown(f"**Description:** {description if description else 'No description'}")
+                    st.markdown(f"**Posted by:** {st.session_state.current_user.get('name', 'Current User')}")
 
 # Campus resources section
 st.markdown("---")
