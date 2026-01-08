@@ -6,19 +6,25 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from src.data_manager import load_users, get_user_reviews
 
-st.set_page_config(page_title="Reviews", page_icon="⭐", layout="wide")
+st.set_page_config(page_title="Reviews", page_icon="⭐", layout="wide")  # 🎨 Setup
 
-if 'current_user' not in st.session_state or st.session_state.current_user is None:
+try:  # 🎨 Load styling
+    with open("assets/style-review.css") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+except:
+    pass
+
+if 'current_user' not in st.session_state or st.session_state.current_user is None:  # 🔒 Auth check
     st.warning("🔒 Please login to see reviews")
     st.stop()
 
-st.title("⭐ User Reviews")
+st.title("⭐ User Reviews")  # 🎯 Header
 
-users = load_users()
+users = load_users()  # 📄 Load data
 
-for user in users:
+for user in users:  # 🔁 Loop through users
     if user.get('id') == st.session_state.current_user.get('id'):
-        continue  # Skip yourself
+        continue
     
     reviews = get_user_reviews(user.get('id'))
     
