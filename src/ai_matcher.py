@@ -62,7 +62,7 @@ Keep it under 300 words but be SPECIFIC with names and reasons.
             return "⚠️ AI features require API key. Please configure GEMINI_API_KEY in secrets."
         
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')  # Use latest model
+        model = genai.GenerativeModel('gemini-flash-latest')  # Use latest model
         response = model.generate_content(prompt)
         return response.text
         
