@@ -49,12 +49,89 @@ users = load_users()
 st.title("👥 Campus Tribe - Find Your People")
 st.markdown("### Swipe to connect with fellow students")
 
-# Filter: Remove current user
-current_user_id = st.session_state.current_user.get('id')
-available_users = [u for u in users if u.get('id') != current_user_id and u.get('id') not in st.session_state.viewed_users]
+# Bonus filters
+st.sidebar.markdown("---")
+st.sidebar.subheader("🔍 Advanced Search")
+
+# Get unique values for filters
+all_majors = ["All"] + sorted(set(u.get("major", "") for u in users if u.get("major")))
+all_years = ["All"] + sorted(set(u.get("year", "") for u in users if u.get("year")))
+
+# Filter options
+selected_major = st.sidebar.selectbox("🎓 Filter by Major", all_majors)
+selected_year = st.sidebar.selectbox("📅 Filter by Year", all_years)
+
+# Skills and interests filters
+all_skills = set()
+all_interests = set()
+
+for user in users:
+    if user.get("skills"):
+        skills = [s.strip() for s in user.get("skills", "").split(",")]
+        all_skills.update(skills)
+    if user.get("interests"):
+        interests = [i.strip() for i in user.get("interests", "").split(",")]
+        all_interests.update(interests)
+
+selected_skills = st.sidebar.multiselect("🛠️ Filter by Skills", sorted(all_skills))
+selected_interests = st.sidebar.multiselect("❤️ Filter by Interests", sorted(all_interests))
+
+# Search functionality
+search_query = st.sidebar.text_input("🔍 Search by name or keywords")
+
+def filter_users(users, major_filter, year_filter, skills_filter, interests_filter, search_query):
+    """Filter users based on criteria"""
+    filtered = []
+
+    for user in users:
+        # Skip current user
+        if user.get('id') == st.session_state.current_user.get('id'):
+            continue
+
+        # Major filter
+        if major_filter != "All" and user.get("major") != major_filter:
+            continue
+
+        # Year filter
+        if year_filter != "All" and user.get("year") != year_filter:
+            continue
+
+        # Skills filter
+        if skills_filter:
+            user_skills = [s.strip() for s in user.get("skills", "").split(",") if s.strip()]
+            if not any(skill in user_skills for skill in skills_filter):
+                continue
+
+        # Interests filter
+        if interests_filter:
+            user_interests = [i.strip() for i in user.get("interests", "").split(",") if i.strip()]
+            if not any(interest in user_interests for interest in interests_filter):
+                continue
+
+        # Search query filter
+        if search_query:
+            search_text = f"{user.get('name', '')} {user.get('major', '')} {user.get('skills', '')} {user.get('interests', '')}".lower()
+            if search_query.lower() not in search_text:
+                continue
+
+        filtered.append(user)
+
+    return filtered
+
+# Apply filters
+filtered_users = filter_users(users, selected_major, selected_year, selected_skills, selected_interests, search_query)
+
+# Determine which users to show based on filters
+if selected_major != "All" or selected_year != "All" or selected_skills or selected_interests or search_query:
+    # Use filtered users if filters are active
+    available_users = [u for u in filtered_users if u.get('id') != st.session_state.current_user.get('id') and u.get('id') not in st.session_state.viewed_users]
+else:
+    # Use all users if no filters are active
+    current_user_id = st.session_state.current_user.get('id')
+    available_users = [u for u in users if u.get('id') != current_user_id and u.get('id') not in st.session_state.viewed_users]
 
 if not available_users:
-    st.info("🎉 You've seen all available users! Check your matches below.")
+    st.info("🎉 You've seen all available users! Check your matches below or adjust your filters.")
 else:
     # Get current user to display
     if st.session_state.current_user_index >= len(available_users):
@@ -157,86 +234,3 @@ with col_learn:
             for skill in skills:
                 st.write(f"• **{skill.strip()}** - {user.get('name')}")
     st.markdown('</div>', unsafe_allow_html=True)
-
-# Bonus filters
-st.sidebar.markdown("---")
-st.sidebar.subheader("🔍 Filters (Bonus)")
-
-selected_major = st.sidebar.selectbox(
-    "Filter by Major",
-    ["All"] + sorted(set(u.get("major", "") for u in users))
-)
-
-selected_skills = st.sidebar.multiselect(
-    "Filter by Skills",
-    sorted(set(u.get("skills", "") for u in users))
-)
-
-selected_interests = st.sidebar.multiselect(
-    "Filter by Interests",
-    sorted(set(u.get("interests", "") for u in users))
-)
-def filter_users(users, major, skills, interests):
-    filtered = []
-
-    for u in users:
-        # Major filter
-        if major != "All" and u.get("major") != major:
-            continue
-
-        # Skills filter
-        if skills:
-            user_skills = u.get("skills", [])
-            if isinstance(user_skills, str):
-                user_skills = [s.strip() for s in user_skills.split(",")]
-
-            if not any(skill in user_skills for skill in skills):
-                continue
-
-        # Interests filter
-        if interests:
-            user_interests = u.get("interests", [])
-            if isinstance(user_interests, str):
-                user_interests = [i.strip() for i in user_interests.split(",")]
-
-            if not any(interest in user_interests for interest in interests):
-                continue
-
-        filtered.append(u)
-
-    return filtered
-
-filtered_users = filter_users(
-    users,
-    selected_major,
-    selected_skills,
-    selected_interests
-)
-
-st.write(f"Found {len(filtered_users)} peers")
-
-for u in filtered_users:
-    st.markdown(
-        f"""
-        **{u['name']}**  
-        🎓 Major: {u['major']}  
-        🛠 Skills: {u['skills']}  
-        ❤️ Interests: {u['interests']}
-        ---
-        """
-    )
-
-query = st.text_input("Search peers")
-
-def matches_search(user, query):
-    if not query:
-        return True
-    query = query.lower()
-    return any(query in str(v).lower() for v in user.values())
-
-filtered_users = [
-    u for u in filtered_users if matches_search(u, query)
-]
-
-# Add filters for major, skills, etc.
-# major_filter = st.sidebar.selectbox("Filter by Major", ["All"] + list(set([u.get('major') for u in users])))select
