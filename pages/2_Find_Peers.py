@@ -161,5 +161,82 @@ with col_learn:
 # Bonus filters
 st.sidebar.markdown("---")
 st.sidebar.subheader("🔍 Filters (Bonus)")
+
+selected_major = st.sidebar.selectbox(
+    "Filter by Major",
+    ["All"] + sorted(set(u.get("major", "") for u in users))
+)
+
+selected_skills = st.sidebar.multiselect(
+    "Filter by Skills",
+    sorted(set(u.get("skills", "") for u in users))
+)
+
+selected_interests = st.sidebar.multiselect(
+    "Filter by Interests",
+    sorted(set(u.get("interests", "") for u in users))
+)
+def filter_users(users, major, skills, interests):
+    filtered = []
+
+    for u in users:
+        # Major filter
+        if major != "All" and u.get("major") != major:
+            continue
+
+        # Skills filter
+        if skills:
+            user_skills = u.get("skills", [])
+            if isinstance(user_skills, str):
+                user_skills = [s.strip() for s in user_skills.split(",")]
+
+            if not any(skill in user_skills for skill in skills):
+                continue
+
+        # Interests filter
+        if interests:
+            user_interests = u.get("interests", [])
+            if isinstance(user_interests, str):
+                user_interests = [i.strip() for i in user_interests.split(",")]
+
+            if not any(interest in user_interests for interest in interests):
+                continue
+
+        filtered.append(u)
+
+    return filtered
+
+filtered_users = filter_users(
+    users,
+    selected_major,
+    selected_skills,
+    selected_interests
+)
+
+st.write(f"Found {len(filtered_users)} peers")
+
+for u in filtered_users:
+    st.markdown(
+        f"""
+        **{u['name']}**  
+        🎓 Major: {u['major']}  
+        🛠 Skills: {u['skills']}  
+        ❤️ Interests: {u['interests']}
+        ---
+        """
+    )
+
+query = st.text_input("Search peers")
+
+def matches_search(user, query):
+    if not query:
+        return True
+    query = query.lower()
+    return any(query in str(v).lower() for v in user.values())
+
+filtered_users = [
+    u for u in filtered_users if matches_search(u, query)
+]
+
 # Add filters for major, skills, etc.
-# major_filter = st.sidebar.selectbox("Filter by Major", ["All"] + list(set([u.get('major') for u in users])))
+# major_filter = st.sidebar.selectbox("Filter by Major", ["All"] + list(set([u.get('major') for u in users])))select
