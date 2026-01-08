@@ -11,3 +11,9 @@ id,user_id,type,title,description,location,price,status
 10,10,electronics,DSLR Camera,"Canon model, used for photography club","IIT Delhi Campus",₹18000,Negotiable
 11,1,electronics,Python Programming Books,"Complete set of 5 books, includes Django","Computer Science Dept, IIT Delhi",₹1000,available
 12,5,furniture,Yoga Mat and Dumbbells,"Light weights, good for fitness","Yoga Studio, IIT Delhi",Free,available
+13,11,furniture,Office Chair,"Ergonomic, adjustable height","Civil Dept, IIT Delhi",₹1200,available
+14,12,electronics,Laptop - Dell Inspiron,"i5 processor, 8GB RAM, 256GB SSD","Hostel Block 5, IIT Delhi",₹25000,Negotiable
+15,13,textbook,Data Structures and Algorithms,"Cormen book, brand new","Computer Science Dept, IIT Delhi",₹800,available
+16,14,electronics,Electric Guitar,"Yamaha model with amplifier","Boys Hostel, IIT Delhi",₹15000,available
+17,15,furniture,Study Lamp,"LED, adjustable brightness","Near Main Gate, IIT Delhi",Free,available
+18,11,room,Sharing 2BHK apartment,"1 room available for girls, furnished","Hauz Khas, 5 min from IIT Delhi",₹10000/month,available
