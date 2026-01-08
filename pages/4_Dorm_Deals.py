@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from src.data_manager import load_listings
 import pandas as pd
+import re
 
 # Setup page configuration
 st.set_page_config(page_title="Dorm Deals", page_icon="🏢", layout="wide")
@@ -74,16 +75,52 @@ free_only = st.sidebar.checkbox("✅ Free items only")
 st.sidebar.markdown("---")
 st.sidebar.info(f"📊 Showing {len(listings)} listings")
 
+# --- LOGIC: Filter the listings based on sidebar ---
+filtered_listings = []
+
+for listing in listings:
+    # 1. Filter by Type
+    if selected_type != "All" and listing.get('type', '').lower() != selected_type.lower():
+        continue
+
+    # 2. Filter by Price
+    price_str = str(listing.get('price', '0'))
+    price_val = 0
+    
+    if 'free' in price_str.lower():
+        price_val = 0
+    else:
+        # Extract the number
+        numbers = re.findall(r'\d+', price_str)
+        if numbers:
+            price_val = int(numbers[0])
+    
+    # Check if price is within the slider range
+    if price_val < price_range[0] or price_val > price_range[1]:
+        continue
+
+    # 3. Filter by Location (if user typed something)
+    if location_search:
+        loc = str(listing.get('location', '')).lower()
+        if location_search.lower() not in loc:
+            continue
+
+    # 4. Filter "Free Only" checkbox
+    if free_only and price_val != 0:
+        continue
+
+    # If it passes all checks, add to our new list
+    filtered_listings.append(listing)
+
 # Display available listings
 st.subheader("📦 Available Listings")
 
-if not listings:
-    st.warning("😕 No listings available yet. Be the first to post!")
+if not filtered_listings:
+    st.warning("😕 No listings match your filters.")
 else:
-    # Display listings in a 3-column grid
     st.markdown('<div class="listings-grid">', unsafe_allow_html=True)
     cols = st.columns(3)
-    for idx, listing in enumerate(listings):
+    for idx, listing in enumerate(filtered_listings):
         with cols[idx % 3]:
             # Card container
             st.markdown(f"""
