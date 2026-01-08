@@ -1,13 +1,3 @@
-# File: 4_Dorm_Deals.py
-# Purpose: Marketplace for accommodation, furniture, and campus resources
-# Assigned to: Aaradhya
-# Deadline: Jan 9, 2024
-
-# Key Features:
-# - Display listings in card format with filters
-# - Allow users to post new listings
-# - Implement search and filtering options
-
 import streamlit as st
 import sys
 import os
