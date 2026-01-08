@@ -2,57 +2,55 @@ import streamlit as st
 import sys
 import os
 
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))  # 📂 Path fix
 
 from src.data_manager import load_users
 from src.utils import calculate_compatibility
 import pandas as pd
 
-# Setup page configuration
-st.set_page_config(page_title="Find Peers", page_icon="👥", layout="wide")
+st.set_page_config(page_title="Find Peers", page_icon="👥", layout="wide")  # 🎨 Setup
 
-# Check if user is logged in
-if 'current_user' not in st.session_state or st.session_state.current_user is None:
+if 'current_user' not in st.session_state or st.session_state.current_user is None:  # 🔒 Auth check
     st.warning("🔒 Please login from the Home page to access Find Peers")
     st.stop()
 
-# Load CSS for styling
-try:
+try:  # 🎨 Load styling
     with open("assets/style-peer.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 except:
-    pass  # CSS file optional
+    pass
 
-# Initialize session state variables
+# 💾 Session state
 if 'viewed_users' not in st.session_state:
-    st.session_state.viewed_users = []  # Track users we've seen
+    st.session_state.viewed_users = []
 if 'matches' not in st.session_state:
-    st.session_state.matches = []  # Track users we connected with
+    st.session_state.matches = []
 if 'current_user_index' not in st.session_state:
-    st.session_state.current_user_index = 0  # Track which user to show
+    st.session_state.current_user_index = 0
 
-# Load all users from CSV
-users = load_users()
+users = load_users()  # 📄 Load data
 
-# Tinder-style swipe UI
-st.title("👥 Campus Tribe - Find Your People")
+st.title("👥 Campus Tribe - Find Your People")  # 🎯 Tinder-style UI
 st.markdown("### Swipe to connect with fellow students")
 
-# Bonus filters
-st.sidebar.markdown("---")
+col_title, col_reset = st.columns([3, 1])  # 🔄 Reset button
+with col_reset:
+    if st.session_state.viewed_users:
+        if st.button("🔄 Reset", help="Review all users again", use_container_width=True):
+            st.session_state.viewed_users = []
+            st.session_state.current_user_index = 0
+            st.rerun()
+
+st.sidebar.markdown("---")  # 🔍 Filters
 st.sidebar.subheader("🔍 Advanced Search")
 
-# Get unique values for filters
-all_majors = ["All"] + sorted(set(u.get("major", "") for u in users if u.get("major")))
+all_majors = ["All"] + sorted(set(u.get("major", "") for u in users if u.get("major")))  # 🎯 Filter options
 all_years = ["All"] + sorted(set(u.get("year", "") for u in users if u.get("year")))
 
-# Filter options
-selected_major = st.sidebar.selectbox("🎓 Filter by Major", all_majors)
+selected_major = st.sidebar.selectbox("🎓 Filter by Major", all_majors)  # 📦 Filter UI
 selected_year = st.sidebar.selectbox("📅 Filter by Year", all_years)
 
-# Skills and interests filters
-all_skills = set()
+all_skills = set()  # 🛠️ Skills & interests
 all_interests = set()
 
 for user in users:
@@ -66,39 +64,31 @@ for user in users:
 selected_skills = st.sidebar.multiselect("🛠️ Filter by Skills", sorted(all_skills))
 selected_interests = st.sidebar.multiselect("❤️ Filter by Interests", sorted(all_interests))
 
-# Search functionality
-search_query = st.sidebar.text_input("🔍 Search by name or keywords")
+search_query = st.sidebar.text_input("🔍 Search by name or keywords")  # 🔎 Search
 
-def filter_users(users, major_filter, year_filter, skills_filter, interests_filter, search_query):
-    """Filter users based on criteria"""
+def filter_users(users, major_filter, year_filter, skills_filter, interests_filter, search_query):  # 🎯 Filter logic
     filtered = []
 
     for user in users:
-        # Skip current user
         if user.get('id') == st.session_state.current_user.get('id'):
             continue
 
-        # Major filter
         if major_filter != "All" and user.get("major") != major_filter:
             continue
 
-        # Year filter
         if year_filter != "All" and user.get("year") != year_filter:
             continue
 
-        # Skills filter
         if skills_filter:
             user_skills = [s.strip() for s in user.get("skills", "").split(",") if s.strip()]
             if not any(skill in user_skills for skill in skills_filter):
                 continue
 
-        # Interests filter
         if interests_filter:
             user_interests = [i.strip() for i in user.get("interests", "").split(",") if i.strip()]
             if not any(interest in user_interests for interest in interests_filter):
                 continue
 
-        # Search query filter
         if search_query:
             search_text = f"{user.get('name', '')} {user.get('major', '')} {user.get('skills', '')} {user.get('interests', '')}".lower()
             if search_query.lower() not in search_text:
@@ -108,33 +98,35 @@ def filter_users(users, major_filter, year_filter, skills_filter, interests_filt
 
     return filtered
 
-# Apply filters
-filtered_users = filter_users(users, selected_major, selected_year, selected_skills, selected_interests, search_query)
+filtered_users = filter_users(users, selected_major, selected_year, selected_skills, selected_interests, search_query)  # ⚙️ Apply filters
 
-# Determine which users to show based on filters
-if selected_major != "All" or selected_year != "All" or selected_skills or selected_interests or search_query:
-    # Use filtered users if filters are active
+if selected_major != "All" or selected_year != "All" or selected_skills or selected_interests or search_query:  # 📦 Determine users to show
     available_users = [u for u in filtered_users if u.get('id') != st.session_state.current_user.get('id') and u.get('id') not in st.session_state.viewed_users]
 else:
-    # Use all users if no filters are active
     current_user_id = st.session_state.current_user.get('id')
     available_users = [u for u in users if u.get('id') != current_user_id and u.get('id') not in st.session_state.viewed_users]
 
 if not available_users:
     st.info("🎉 You've seen all available users! Check your matches below or adjust your filters.")
+    
+    if st.session_state.viewed_users:
+        st.markdown("<div style='text-align: center; margin: 2rem 0;'>", unsafe_allow_html=True)
+        if st.button("🔄 Review Passed Users", use_container_width=False, type="primary"):
+            st.session_state.viewed_users = []
+            st.session_state.current_user_index = 0
+            st.success("✨ Showing all users again! Give them another chance.")
+            st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
 else:
-    # Get current user to display
     if st.session_state.current_user_index >= len(available_users):
         st.session_state.current_user_index = 0
 
     user = available_users[st.session_state.current_user_index]
 
-    # Get user's rating
     from src.data_manager import get_user_rating
     avg_rating, num_ratings = get_user_rating(user.get('id'))
 
-    # Center the user card
-    col1, col2, col3 = st.columns([1, 2, 1])
+    col1, col2, col3 = st.columns([1, 2, 1])  # 🎴 User card
     with col2:
         # Display user profile
         st.markdown(f"""
@@ -152,74 +144,63 @@ else:
                 <p><strong>Interests:</strong> {user.get('interests', 'N/A')}</p>
             </div>
             <div class="x-factor">
-                ✨ {user.get('x_factor', 'No special skill listed')}
+                ✨ {user.get('x_factor', 'Discovering their unique skill...')}
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        # Swipe buttons
-        col_left, col_right = st.columns(2)
+        col_left, col_right = st.columns(2)  # 👆 Swipe buttons
         with col_left:
             if st.button("👎 Pass", use_container_width=True, key=f"pass_{user.get('id')}"):
-                # Add user ID to viewed_users
                 st.session_state.viewed_users.append(user.get('id'))
                 st.session_state.current_user_index += 1
                 st.rerun()
 
         with col_right:
-            if st.button("👍 Connect", use_container_width=True, key=f"connect_{user.get('id')}"):
+            already_connected = any(m.get('id') == user.get('id') for m in st.session_state.matches)
+            
+            if already_connected:
+                st.button("✅ Already Connected", use_container_width=True, disabled=True, key=f"connected_{user.get('id')}")
+            elif st.button("👍 Connect", use_container_width=True, key=f"connect_{user.get('id')}"):
                 from src.data_manager import save_connection
                 
-                # Save connection to CSV (this makes it permanent)
                 save_connection(
                     st.session_state.current_user.get('id'),
                     user.get('id'),
                     'peer_match'
                 )
                 
-                # Also add to session state for immediate display
                 st.session_state.matches.append(user)
                 st.session_state.viewed_users.append(user.get('id'))
                 st.session_state.current_user_index += 1
                 st.success(f"✅ Connected with {user.get('name')}!")
                 st.rerun()
 
-# Display study buddy matches
-st.markdown("---")
+st.markdown("---")  # 🎓 Matches section
 st.subheader("🎓 Your Study Buddy Matches")
 
 if st.session_state.matches:
     st.success(f"You have {len(st.session_state.matches)} matches!")
 
-    # Display matches
-    for match in st.session_state.matches:
+    for match in st.session_state.matches:  # 📊 Display matches
         with st.expander(f"👤 {match.get('name', 'Unknown')}"):
             st.write(f"**Email:** {match.get('email', 'N/A')}")
             st.write(f"**Major:** {match.get('major', 'N/A')}")
             st.write(f"**Can teach:** {match.get('can_teach', 'N/A')}")
             st.write(f"**Wants to learn:** {match.get('wants_to_learn', 'N/A')}")
-
-            # Calculate and display compatibility score
-            # Use calculate_compatibility() from src/utils.py
-            # Display as percentage with progress bar
 else:
     st.info("No matches yet. Start swiping to find your study buddies!")
 
-# Skill exchange marketplace
-st.markdown("---")
+st.markdown("---")  # 🔄 Skill exchange
 st.subheader("🔄 Skill Exchange Marketplace")
 st.caption("Connect with students to learn new skills or teach what you know")
 
-# Create two columns for skills
-col_teach, col_learn = st.columns(2)
+col_teach, col_learn = st.columns(2)  # 📚 Two columns
 
 with col_teach:
     st.markdown('<div class="skill-card teach">', unsafe_allow_html=True)
     st.markdown("### 📚 Skills Available to Learn")
-    # Loop through all users
-    # Extract and display skills from 'can_teach' field
-    # Format: "Python basics" by Yuvraj/Siddhika/Aaradhya (email)
-
+    
     for user in users:
         if user.get('can_teach'):
             skills = user.get('can_teach', '').split(',')
@@ -230,10 +211,7 @@ with col_teach:
 with col_learn:
     st.markdown('<div class="skill-card learn">', unsafe_allow_html=True)
     st.markdown("### 🎯 Skills People Want to Learn")
-    # Loop through all users
-    # Extract and display skills from 'wants_to_learn' field
-    # Format: "Data Visualization" wanted by Yuvraj/Siddhika/Aaradhya
-
+    
     for user in users:
         if user.get('wants_to_learn'):
             skills = user.get('wants_to_learn', '').split(',')
