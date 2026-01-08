@@ -22,6 +22,11 @@ import pandas as pd
 # Setup page configuration
 st.set_page_config(page_title="Find Peers", page_icon="👥", layout="wide")
 
+# Check if user is logged in
+if 'current_user' not in st.session_state or st.session_state.current_user is None:
+    st.warning("🔒 Please login from the Home page to access Find Peers")
+    st.stop()
+
 # Load CSS for styling
 try:
     with open("assets/style-peer.css") as f:
@@ -44,8 +49,8 @@ users = load_users()
 st.title("👥 Campus Tribe - Find Your People")
 st.markdown("### Swipe to connect with fellow students")
 
-# Filter: Remove current user (assume user ID 1 is logged in)
-current_user_id = 1
+# Filter: Remove current user
+current_user_id = st.session_state.current_user.get('id')
 available_users = [u for u in users if u.get('id') != current_user_id and u.get('id') not in st.session_state.viewed_users]
 
 if not available_users:

@@ -1,6 +1,6 @@
 # File: 4_Dorm_Deals.py
 # Purpose: Marketplace for accommodation, furniture, and campus resources
-# Assigned to: Siddhika & Aaradhya
+# Assigned to: Aaradhya
 # Deadline: Jan 9, 2024
 
 # Key Features:
@@ -15,7 +15,7 @@ import os
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.data_manager import load_listings, load_users
+from src.data_manager import load_listings, load_users, save_listing
 import pandas as pd
 
 # Initialize session state if not already done
@@ -24,6 +24,11 @@ if 'current_user' not in st.session_state:
 
 # Setup page configuration
 st.set_page_config(page_title="Dorm Deals", page_icon="🏢", layout="wide")
+
+# Check if user is logged in
+if 'current_user' not in st.session_state or st.session_state.current_user is None:
+    st.warning("🔒 Please login from the Home page to access Dorm Deals")
+    st.stop()
 
 # Load CSS for styling
 try:
@@ -125,11 +130,7 @@ st.markdown("---")
 st.subheader("📝 Post Your Own Listing")
 st.caption("Have something to sell or give away? List it here!")
 
-# Check if user is logged in
-if 'current_user' not in st.session_state or st.session_state.current_user is None:
-    st.info("🔒 Please log in to post a listing. Visit the home page to login.")
-else:
-    with st.form("post_listing_form"):
+with st.form("post_listing_form"):
         col1, col2 = st.columns(2)
 
         with col1:
@@ -152,10 +153,26 @@ else:
             if not title or not listing_type:
                 st.error("⚠️ Please fill in all required fields (Title and Type)")
             else:
-                # In a real app, we would save the listing with the current user's ID
-                st.success(f"✅ Listing '{title}' posted successfully!")
+                # Create listing data dictionary
+                listing_data = {
+                    "user_id": st.session_state.current_user.get('id'),
+                    "type": listing_type,
+                    "title": title,
+                    "description": description if description else "No description provided",
+                    "location": location if location else "Location not specified",
+                    "price": price if price else "Price not specified",
+                    "status": "available"
+                }
+
+                # Save the listing to CSV
+                listing_id = save_listing(listing_data)
+
+                st.success(f"✅ Listing '{title}' posted successfully! (ID: {listing_id})")
                 st.balloons()
-                st.info("💡 In the full app, this would be saved to listings.csv and shown to all users.")
+                st.info("💡 Your listing has been saved to the database and is now visible to other users.")
+
+                # Refresh the page to show the new listing
+                st.rerun()
 
                 # Show preview of what was submitted
                 with st.expander("👁️ Preview Your Listing"):

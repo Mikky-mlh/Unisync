@@ -259,10 +259,14 @@ with st.form("ai_chat_form"):
     submit_button = st.form_submit_button("🚀 Send Query", type="primary")
 
 if submit_button and user_query and user_query.strip():
-    st.session_state.ai_chat_history.append({"role": "user", "content": user_query})
-    with st.spinner("🤖 Uni-Sync AI is thinking..."):
-        ai_response = ai_assistant(user_query, users, listings)
-        st.session_state.ai_chat_history.append({"role": "assistant", "content": ai_response})
+    if st.session_state.current_user is None:
+        st.session_state.ai_chat_history.append({"role": "user", "content": user_query})
+        st.session_state.ai_chat_history.append({"role": "assistant", "content": "🔒 Please login to use the AI assistant. Sign in from the sidebar to access this feature."})
+    else:
+        st.session_state.ai_chat_history.append({"role": "user", "content": user_query})
+        with st.spinner("🤖 Uni-Sync AI is thinking..."):
+            ai_response = ai_assistant(user_query, users, listings)
+            st.session_state.ai_chat_history.append({"role": "assistant", "content": ai_response})
 
 # Display chat history
 for chat in st.session_state.ai_chat_history:

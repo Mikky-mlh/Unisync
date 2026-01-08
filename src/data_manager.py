@@ -140,11 +140,27 @@ def save_connection(user1_id, user2_id, connection_type):
     df = pd.concat([df, pd.DataFrame([new_connection])], ignore_index=True)
     df.to_csv("data/connections.csv", index=False)
 
+def save_listing(listing_data):
+    """Add new listing to CSV"""
+    if os.path.exists("data/listings.csv"):
+        df = pd.read_csv("data/listings.csv")
+        new_id = len(df) + 1
+    else:
+        # If file doesn't exist, create it with proper structure
+        df = pd.DataFrame(columns=["id", "user_id", "type", "title", "description", "location", "price", "status"])
+        new_id = 1
+
+    # Add the new listing data
+    listing_data['id'] = new_id
+    df = pd.concat([df, pd.DataFrame([listing_data])], ignore_index=True)
+    df.to_csv("data/listings.csv", index=False)
+    return new_id
+
 def get_user_connections(user_id):
     """Get all connections for a user"""
     if not os.path.exists("data/connections.csv"):
         return []
-    
+
     df = pd.read_csv("data/connections.csv")
     connections = df[(df['user1_id'] == user_id) | (df['user2_id'] == user_id)]
     return connections.to_dict('records')
