@@ -1,9 +1,10 @@
 import google.generativeai as genai
 import streamlit as st
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=300)  # 💾 Cache for 5 mins
 def ai_assistant(query, users, listings):
-    # Remove the [:10] truncation - use ALL users and listings
+    import csv
+    
     users_str = "\n".join([
         f"• {u.get('name')}: Major={u.get('major')}, Year={u.get('year')}, "
         f"Skills={u.get('skills')}, Can teach={u.get('can_teach')}, "
@@ -17,7 +18,14 @@ def ai_assistant(query, users, listings):
         for l in listings if l
     ])
     
-    prompt = f"""You are Uni-Sync AI, a smart campus matchmaking assistant at IIT Delhi.
+    try:
+        with open('data/ratings.csv', 'r') as f:
+            ratings = list(csv.DictReader(f))
+            ratings_str = "\n".join([f"User {r['rater_id']} rated User {r['rated_id']}: {r['rating']}/5" for r in ratings[:50]])
+    except:
+        ratings_str = "No ratings available"
+    
+    prompt = f"""You are Uni-Sync AI, a smart campus matchmaking assistant at IIT Delhi.  # 🤖 AI prompt
 
 Student query: "{query}"
 
@@ -35,6 +43,9 @@ COMPLETE STUDENT DATABASE:
 
 COMPLETE MARKETPLACE LISTINGS:
 {listings_str}
+
+USER RATINGS (Trust Scores):
+{ratings_str}
 
 YOUR RESPONSE MUST:
 1. Find 2-3 BEST matches with SPECIFIC reasons
@@ -56,7 +67,7 @@ Format:
 Keep it under 300 words but be SPECIFIC with names and reasons.
 """
     
-    try:
+    try:  # 🚀 Call Gemini API
         api_key = st.secrets.get("GEMINI_API_KEY")
         if not api_key:
             return "⚠️ AI features require API key. Please configure GEMINI_API_KEY in secrets."

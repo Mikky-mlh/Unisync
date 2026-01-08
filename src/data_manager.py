@@ -1,14 +1,11 @@
 import pandas as pd
 import os
 
-def init_data():
-    """Create sample data files if they don't exist"""
+def init_data():  # 🚀 Bootstrap data files
     
-    # Create data directory if it doesn't exist
-    os.makedirs("data", exist_ok=True)
+    os.makedirs("data", exist_ok=True)  # 📂 Create dir
     
-    # Users CSV
-    if not os.path.exists("data/users.csv") or os.path.getsize("data/users.csv") == 0:
+    if not os.path.exists("data/users.csv") or os.path.getsize("data/users.csv") == 0:  # 👥 Users CSV
         sample_users = [
             {
                 "id": 1,
@@ -39,8 +36,7 @@ def init_data():
         ]
         pd.DataFrame(sample_users).to_csv("data/users.csv", index=False)
     
-    # Listings CSV
-    if not os.path.exists("data/listings.csv") or os.path.getsize("data/listings.csv") == 0:
+    if not os.path.exists("data/listings.csv") or os.path.getsize("data/listings.csv") == 0:  # 📝 Listings CSV
         sample_listings = [
             {
                 "id": 1,
@@ -65,8 +61,7 @@ def init_data():
         ]
         pd.DataFrame(sample_listings).to_csv("data/listings.csv", index=False)
 
-def load_users():
-    """Load users from CSV"""
+def load_users():  # 📄 Load users
     try:
         if os.path.exists("data/users.csv"):
             return pd.read_csv("data/users.csv").to_dict('records')
@@ -74,8 +69,7 @@ def load_users():
         pass
     return []
 
-def load_listings():
-    """Load listings from CSV"""
+def load_listings():  # 📄 Load listings
     try:
         if os.path.exists("data/listings.csv"):
             return pd.read_csv("data/listings.csv").to_dict('records')
@@ -83,8 +77,7 @@ def load_listings():
         pass
     return []
 
-def save_user(user_data):
-    """Add new user to CSV"""
+def save_user(user_data):  # 💾 Save new user
     df = pd.read_csv("data/users.csv")
     new_id = len(df) + 1
     user_data['id'] = new_id
@@ -92,8 +85,7 @@ def save_user(user_data):
     df.to_csv("data/users.csv", index=False)
     return new_id
 
-def load_passwords():
-    """Load passwords from CSV"""
+def load_passwords():  # 🔑 Load passwords
     try:
         if os.path.exists("data/passwords.csv"):
             return pd.read_csv("data/passwords.csv").to_dict('records')
@@ -101,8 +93,7 @@ def load_passwords():
         pass
     return []
 
-def save_password(email, password):
-    """Add new password to CSV"""
+def save_password(email, password):  # 💾 Save password
     if os.path.exists("data/passwords.csv"):
         df = pd.read_csv("data/passwords.csv")
     else:
@@ -112,16 +103,14 @@ def save_password(email, password):
     df = pd.concat([df, new_entry], ignore_index=True)
     df.to_csv("data/passwords.csv", index=False)
 
-def verify_password(email, password):
-    """Verify if email and password match"""
+def verify_password(email, password):  # ✅ Verify login
     passwords = load_passwords()
     for entry in passwords:
         if entry.get('email', '').lower() == email.lower() and entry.get('password') == password:
             return True
     return False
 
-def save_connection(user1_id, user2_id, connection_type):
-    """Save a connection between two users"""
+def save_connection(user1_id, user2_id, connection_type):  # 🔗 Save connection
     import pandas as pd
     from datetime import datetime
     
@@ -140,24 +129,20 @@ def save_connection(user1_id, user2_id, connection_type):
     df = pd.concat([df, pd.DataFrame([new_connection])], ignore_index=True)
     df.to_csv("data/connections.csv", index=False)
 
-def save_listing(listing_data):
-    """Add new listing to CSV"""
+def save_listing(listing_data):  # 💾 Save listing
     if os.path.exists("data/listings.csv"):
         df = pd.read_csv("data/listings.csv")
         new_id = len(df) + 1
     else:
-        # If file doesn't exist, create it with proper structure
         df = pd.DataFrame(columns=["id", "user_id", "type", "title", "description", "location", "price", "status"])
         new_id = 1
 
-    # Add the new listing data
     listing_data['id'] = new_id
     df = pd.concat([df, pd.DataFrame([listing_data])], ignore_index=True)
     df.to_csv("data/listings.csv", index=False)
     return new_id
 
-def get_user_connections(user_id):
-    """Get all connections for a user"""
+def get_user_connections(user_id):  # 🔗 Get connections
     if not os.path.exists("data/connections.csv"):
         return []
 
@@ -165,8 +150,7 @@ def get_user_connections(user_id):
     connections = df[(df['user1_id'] == user_id) | (df['user2_id'] == user_id)]
     return connections.to_dict('records')
 
-def save_rating(rater_id, rated_id, rating, review=""):
-    """Save a rating (1-5 stars) for a user"""
+def save_rating(rater_id, rated_id, rating, review=""):  # ⭐ Save rating
     from datetime import datetime
     
     if not os.path.exists("data/ratings.csv"):
@@ -174,15 +158,12 @@ def save_rating(rater_id, rated_id, rating, review=""):
     else:
         df = pd.read_csv("data/ratings.csv")
     
-    # Check if user already rated this person (one rating per pair)
     existing = df[(df['rater_id'] == rater_id) & (df['rated_id'] == rated_id)]
     if not existing.empty:
-        # Update existing rating
         df.loc[(df['rater_id'] == rater_id) & (df['rated_id'] == rated_id), 'rating'] = rating
         df.loc[(df['rater_id'] == rater_id) & (df['rated_id'] == rated_id), 'review'] = review
         df.loc[(df['rater_id'] == rater_id) & (df['rated_id'] == rated_id), 'timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     else:
-        # Add new rating
         new_rating = {
             'rater_id': rater_id,
             'rated_id': rated_id,
@@ -194,10 +175,9 @@ def save_rating(rater_id, rated_id, rating, review=""):
     
     df.to_csv("data/ratings.csv", index=False)
 
-def get_user_rating(user_id):
-    """Get average rating for a user"""
+def get_user_rating(user_id):  # 📊 Get avg rating
     if not os.path.exists("data/ratings.csv"):
-        return 0, 0  # (average rating, number of ratings)
+        return 0, 0
     
     df = pd.read_csv("data/ratings.csv")
     user_ratings = df[df['rated_id'] == user_id]
@@ -210,8 +190,7 @@ def get_user_rating(user_id):
     
     return round(avg_rating, 1), num_ratings
 
-def get_user_reviews(user_id):
-    """Get all reviews for a user"""
+def get_user_reviews(user_id):  # 📝 Get reviews
     if not os.path.exists("data/ratings.csv"):
         return []
     

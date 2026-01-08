@@ -1,7 +1,6 @@
 import streamlit as st
 
-def user_card(user_data):
-    """Display a user profile card"""
+def user_card(user_data):  # 🎴 Display user card
     st.markdown(f"""
     <div style="
         border: 2px solid #e0e0e0;
@@ -26,8 +25,7 @@ def user_card(user_data):
     </div>
     """, unsafe_allow_html=True)
 
-def skill_card(skill_data, type="teach"):
-    """Display a skill card"""
+def skill_card(skill_data, type="teach"):  # 🎯 Display skill card
     if type == "teach":
         st.markdown(f"""
         <div style="
@@ -43,7 +41,7 @@ def skill_card(skill_data, type="teach"):
             <small>Contact: {skill_data['teacher_email']}</small>
         </div>
         """, unsafe_allow_html=True)
-    else:  # type == "learn"
+    else:
         st.markdown(f"""
         <div style="
             border-left: 4px solid #007bff;
