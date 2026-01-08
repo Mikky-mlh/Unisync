@@ -86,11 +86,20 @@ for listing in listings:
     # 2. Filter by Price
     price_str = str(listing.get('price', '0'))
     price_val = 0
-    
+
     if 'free' in price_str.lower():
         price_val = 0
     else:
-        # Extract the number
+        # Extract numeric components from the price string.
+        # If a range like "$5-10" is detected, use the average of the first two numbers.
+        # Otherwise, fall back to the first numeric group.
+        numbers = re.findall(r'\d+', price_str)
+        if numbers:
+            numbers = [int(n) for n in numbers]
+            if '-' in price_str and len(numbers) >= 2:
+                price_val = int((numbers[0] + numbers[1]) / 2)
+            else:
+                price_val = numbers[0]
         numbers = re.findall(r'\d+', price_str)
         if numbers:
             price_val = int(numbers[0])
