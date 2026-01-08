@@ -169,18 +169,61 @@ else:
 # Campus resources section
 st.markdown("---")
 st.subheader("🌟 Campus Resources")
-st.caption("Quick links to campus services")
+st.caption("Quick access to IIT Delhi services")
 
 col1, col2, col3, col4 = st.columns(4)
+
 with col1:
-    st.markdown("🏫 **Housing Office**")
-    st.caption("Find official housing")
+    with st.expander("🏫 Housing Office"):
+        st.markdown("""
+        **Contact Information:**
+        - Email: housing@iitd.ac.in
+        - Phone: +91-11-2659-1234
+        - Office: Block IV, Ground Floor
+        
+        **Services:**
+        - Room allocation
+        - Hostel complaints
+        - AC/furniture repairs
+        """)
+
 with col2:
-    st.markdown("📚 **Library**")
-    st.caption("Borrow textbooks")
+    with st.expander("📚 Central Library"):
+        st.markdown("""
+        **Timings:**
+        - Mon-Fri: 8:00 AM - 12:00 AM
+        - Sat-Sun: 9:00 AM - 10:00 PM
+        
+        **Services:**
+        - Book issue/return
+        - Study rooms booking
+        - Digital resources
+        
+        **Location:** Near Main Gate
+        """)
+
 with col3:
-    st.markdown("🛍️ **Campus Store**")
-    st.caption("Buy supplies")
+    with st.expander("🛍️ Campus Store"):
+        st.markdown("""
+        **Timings:** 9:00 AM - 6:00 PM (Mon-Sat)
+        
+        **Available Items:**
+        - Stationery supplies
+        - Electronics accessories
+        - IIT Delhi merchandise
+        
+        **Location:** Student Activity Center
+        """)
+
 with col4:
-    st.markdown("❓ **Help Desk**")
-    st.caption("Get support")
+    with st.expander("❓ Help Desk"):
+        st.markdown("""
+        **Contact:**
+        - Email: helpdesk@iitd.ac.in
+        - Campus Ext: 1234
+        
+        **For Issues:**
+        - Internet/WiFi problems
+        - ID card issues
+        - General complaints
+        """)

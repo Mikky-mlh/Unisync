@@ -119,3 +119,32 @@ def verify_password(email, password):
         if entry.get('email', '').lower() == email.lower() and entry.get('password') == password:
             return True
     return False
+
+def save_connection(user1_id, user2_id, connection_type):
+    """Save a connection between two users"""
+    import pandas as pd
+    from datetime import datetime
+    
+    if not os.path.exists("data/connections.csv"):
+        df = pd.DataFrame(columns=['user1_id', 'user2_id', 'connection_type', 'timestamp'])
+    else:
+        df = pd.read_csv("data/connections.csv")
+    
+    new_connection = {
+        'user1_id': user1_id,
+        'user2_id': user2_id,
+        'connection_type': connection_type,
+        'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    
+    df = pd.concat([df, pd.DataFrame([new_connection])], ignore_index=True)
+    df.to_csv("data/connections.csv", index=False)
+
+def get_user_connections(user_id):
+    """Get all connections for a user"""
+    if not os.path.exists("data/connections.csv"):
+        return []
+    
+    df = pd.read_csv("data/connections.csv")
+    connections = df[(df['user1_id'] == user_id) | (df['user2_id'] == user_id)]
+    return connections.to_dict('records')

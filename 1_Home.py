@@ -271,6 +271,40 @@ for chat in st.session_state.ai_chat_history:
     else:
         st.markdown(f"<div class='chat-assistant'><b>🤖 AI Assistant:</b> {chat['content']}</div>", unsafe_allow_html=True)
 
+# MY CONNECTIONS SECTION
+if st.session_state.current_user:
+    st.markdown("---")
+    st.markdown('<h2 class="section-title">🤝 My Connections</h2>', unsafe_allow_html=True)
+    
+    # Get connections from session state (matches from Find Peers)
+    if 'matches' in st.session_state and st.session_state.matches:
+        connections = st.session_state.matches
+        st.success(f"You have {len(connections)} connections!")
+        
+        cols = st.columns(3)
+        for idx, conn in enumerate(connections):
+            with cols[idx % 3]:
+                st.markdown(f"""
+                <div style="
+                    border: 2px solid #4f46e5;
+                    border-radius: 15px;
+                    padding: 1.5rem;
+                    margin-bottom: 1rem;
+                    background: rgba(79, 70, 229, 0.1);
+                ">
+                    <h3>👤 {conn.get('name', 'Unknown')}</h3>
+                    <p><strong>🎓 Major:</strong> {conn.get('major', 'N/A')}</p>
+                    <p><strong>📧 Email:</strong> {conn.get('email', 'N/A')}</p>
+                    <p><strong>📚 Can teach:</strong> {conn.get('can_teach', 'N/A')}</p>
+                    <p><strong>🎯 Wants to learn:</strong> {conn.get('wants_to_learn', 'N/A')}</p>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                if st.button(f"📧 Email {conn.get('name')}", key=f"email_{conn.get('id')}", use_container_width=True):
+                    st.info(f"mailto:{conn.get('email')}")
+    else:
+        st.info("👉 No connections yet. Start swiping in Find Peers to make connections!")
+
 # Footer
 st.markdown('</div>', unsafe_allow_html=True)  # Close main-content div
 st.markdown('<footer><p>Made with ❤️ for the university community | Uni-Sync © 2024</p></footer>', unsafe_allow_html=True)

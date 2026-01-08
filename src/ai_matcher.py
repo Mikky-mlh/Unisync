@@ -3,57 +3,68 @@ import streamlit as st
 
 @st.cache_data(ttl=300)
 def ai_assistant(query, users, listings):
-    """AI helper to find matches based on natural language query"""
+    # Remove the [:10] truncation - use ALL users and listings
+    users_str = "\n".join([
+        f"• {u.get('name')}: Major={u.get('major')}, Year={u.get('year')}, "
+        f"Skills={u.get('skills')}, Can teach={u.get('can_teach')}, "
+        f"Wants to learn={u.get('wants_to_learn')}, Email={u.get('email')}"
+        for u in users if u
+    ])
     
-    # Prepare context
-    users_str = "\n".join([f"{u.get('name', 'N/A')}: Skills={u.get('skills', 'N/A')}, Teach={u.get('can_teach', 'N/A')}, Learn={u.get('wants_to_learn', 'N/A')}" 
-    for u in users[:10] if u])
-    listings_str = "\n".join([f"{l.get('title', 'N/A')}: {l.get('description', 'N/A')} ({l.get('type', 'N/A')}, Status: {l.get('status', 'N/A')})" 
-        for l in listings[:10] if l])
+    listings_str = "\n".join([
+        f"• {l.get('title')}: Type={l.get('type')}, Price={l.get('price')}, "
+        f"Location={l.get('location')}, Description={l.get('description')}"
+        for l in listings if l
+    ])
     
-    prompt = f"""
-    You are Uni-Sync AI, a campus assistant. A student asks: "{query}"
-    
-    Available students:
-    {users_str}
-    
-    Available resources:
-    {listings_str}
-    
-    Your task:
-    1. Understand what they need (study buddy, skill exchange, accommodation, etc.)
-    2. Match them with relevant people/resources
-    3. Give specific recommendations with reasons
-    4. Be friendly and encouraging
-    
-    Format your response:
-    - Start with "I found these perfect matches for you!"
-    - Use bullet points
-    - Mention names and why they match
-    - Suggest next steps (how to connect)
-    
-    Keep it under 200 words.
-    """
+    prompt = f"""You are Uni-Sync AI, a smart campus matchmaking assistant at IIT Delhi.
+
+Student query: "{query}"
+
+ANALYZE CAREFULLY:
+1. What do they need?
+   - Study buddy for a specific course?
+   - Someone to teach them a skill?
+   - Accommodation/room/furniture?
+   - Something to buy/sell?
+
+2. Search through ALL available students and listings below
+
+COMPLETE STUDENT DATABASE:
+{users_str}
+
+COMPLETE MARKETPLACE LISTINGS:
+{listings_str}
+
+YOUR RESPONSE MUST:
+1. Find 2-3 BEST matches with SPECIFIC reasons
+2. Include full names and contact emails
+3. Explain WHY each match is perfect
+4. Give actionable next steps
+
+Format:
+🎯 Perfect Matches Found!
+
+👤 [Name] ([Major]) - [Specific reason they match]
+   📧 Contact: [email]
+   💡 Why: [Explain skill overlap or interest alignment]
+
+👤 [Next match...]
+
+📍 Next Steps: [What the student should do]
+
+Keep it under 300 words but be SPECIFIC with names and reasons.
+"""
     
     try:
-        # Get Gemini API key from secrets
         api_key = st.secrets.get("GEMINI_API_KEY")
         if not api_key:
-            return "⚠️ AI features require API key setup. Using demo mode: I'd help you find matches!"
+            return "⚠️ AI features require API key. Please configure GEMINI_API_KEY in secrets."
         
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-1.5-flash')  # Use latest model
         response = model.generate_content(prompt)
         return response.text
         
     except Exception as e:
-        # Fallback response
-        return f"""
-        I'd help you find matches! Based on "{query}", I recommend:
-        
-        • **Alex Chen** - Python expert who can teach you in 30 mins
-        • **Sam Patel** - Has free furniture and wants to learn Python
-        • **Study Desk** - Available for free in Dorm B
-        
-        Click "Find Peers" or "Dorm Deals" to explore more!
-        """
+        return f"⚠️ AI is temporarily unavailable: {str(e)}"
