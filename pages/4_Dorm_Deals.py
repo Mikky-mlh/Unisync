@@ -3,57 +3,59 @@ import sys
 import os
 import streamlit.components.v1 as components  # Import components for JS execution
 
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))  # 📂 Path fix
 
 from src.data_manager import load_listings, load_users, save_listing
 import pandas as pd
 import re
 import urllib.parse
 
-# Initialize session state if not already done
 if 'current_user' not in st.session_state:
     st.session_state.current_user = None
 
-# Setup page configuration
-st.set_page_config(page_title="Dorm Deals", page_icon="🏢", layout="wide")
+st.set_page_config(page_title="Dorm Deals", page_icon="🏢", layout="wide")  # 🎨 Setup
 
-# Check if user is logged in
-if 'current_user' not in st.session_state or st.session_state.current_user is None:
+if 'current_user' not in st.session_state or st.session_state.current_user is None:  # 🔒 Auth check
     st.warning("🔒 Please login from the Home page to access Dorm Deals")
     st.stop()
 
-# Load CSS for styling
-try:
+try:  # 🎨 Load styling
     with open("assets/style-dorm.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 except:
-    pass  # CSS file optional
+    pass
 
-# Page header
-st.title("🏢 Dorm Deals")
+# 🎴 Listing card builder
+def listing_card(listing_type, listing_status, title, description, poster_name, location, price):
+    return f"""<div class="listing-card">
+<div class="listing-header">
+<span class="listing-type">{listing_type.upper()}</span>
+<span class="listing-status">{listing_status.upper()}</span></div>
+<h3 class="listing-title">{title}</h3>
+<p class="listing-desc">{description}</p>
+<div class="listing-details">
+<p>👤 <strong>Posted by:</strong> {poster_name}</p>
+<p>📍 <strong>Location:</strong> {location}</p>
+<p>💰 <strong>Price:</strong> {price}</p></div></div>"""
+
+st.title("🏢 Dorm Deals")  # 🎯 Header
 st.markdown("### Your campus marketplace for rooms, furniture, and resources")
 st.caption("💡 Find great deals or post items you want to sell/give away")
 
-# Load all listings and users from CSV
-listings = load_listings()
+listings = load_listings()  # 📄 Load data
 users = load_users()
 
-# Create a mapping from user_id to user info for easy lookup
-user_map = {}
+user_map = {}  # 🗺️ User mapping
 for user in users:
     user_map[user['id']] = user
 
-# Sidebar filters
-st.sidebar.title("🔍 Filters")
+st.sidebar.title("🔍 Filters")  # 🎛️ Sidebar filters
 st.sidebar.caption("Narrow down your search")
 
-# Filter by item type
-type_options = ["All", "room", "furniture", "textbook", "electronics", "other"]
+type_options = ["All", "room", "furniture", "textbook", "electronics", "other"]  # 🏷️ Filter options
 selected_type = st.sidebar.selectbox("🏷️ Item Type", type_options)
 
-# Price range filter
-if listings:
+if listings:  # 💰 Price range
     prices = []
     for l in listings:
         price_str = str(l.get('price', '0'))
@@ -72,31 +74,25 @@ if listings:
 else:
     price_range = (0, 1000)
 
-# Location search
-location_search = st.sidebar.text_input("📍 Location", placeholder="e.g., Dorm B")
+location_search = st.sidebar.text_input("📍 Location", placeholder="e.g., Dorm B")  # 📍 Location
 
-# Free items only filter
-free_only = st.sidebar.checkbox("✅ Free items only")
+free_only = st.sidebar.checkbox("✅ Free items only")  # 🆓 Free filter
 
 st.sidebar.markdown("---")
 st.sidebar.info(f"📊 Showing {len(listings)} listings")
 
-# --- LOGIC: Filter the listings based on sidebar ---
-filtered_listings = []
+filtered_listings = []  # ⚙️ Filter logic
 
 for listing in listings:
-    # 1. Filter by Type
     if selected_type != "All" and listing.get('type', '').lower() != selected_type.lower():
         continue
 
-    # 2. Filter by Price
-    price_str = str(listing.get('price', '0'))
+    price_str = str(listing.get('price', '0'))  # 💵 Price filter
     price_val = 0
 
     if 'free' in price_str.lower():
         price_val = 0
     else:
-        # Extract numeric components from the price string.
         numbers = re.findall(r'\d+', price_str)
         if numbers:
             numbers = [int(n) for n in numbers]
@@ -106,26 +102,20 @@ for listing in listings:
                 price_val = numbers[0]
         else:
              price_val = 0
-    
-    # Check if price is within the slider range
     if price_val < price_range[0] or price_val > price_range[1]:
         continue
 
-    # 3. Filter by Location (if user typed something)
-    if location_search:
+    if location_search:  # 📍 Location filter
         loc = str(listing.get('location', '')).lower()
         if location_search.lower() not in loc:
             continue
 
-    # 4. Filter "Free Only" checkbox
-    if free_only and price_val != 0:
+    if free_only and price_val != 0:  # 🆓 Free only
         continue
 
-    # If it passes all checks, add to our new list
     filtered_listings.append(listing)
 
-# Display available listings
-st.subheader("📦 Available Listings")
+st.subheader("📦 Available Listings")  # 📦 Display listings
 
 if not filtered_listings:
     st.warning("😕 No listings match your filters.")
@@ -134,27 +124,19 @@ else:
     cols = st.columns(3)
     for idx, listing in enumerate(filtered_listings):
         with cols[idx % 3]:
-            # Get the user who posted this listing
             poster_user = user_map.get(listing.get('user_id'))
             poster_name = poster_user.get('name', 'Anonymous') if poster_user else 'Unknown'
             poster_email = poster_user.get('email', '') if poster_user else ''
 
-            # Card container
-            st.markdown(f"""
-            <div class="listing-card">
-                <div class="listing-header">
-                    <span class="listing-type">{listing.get('type', 'other').upper()}</span>
-                    <span class="listing-status">{listing.get('status', 'available').upper()}</span>
-                </div>
-                <h3 class="listing-title">{listing.get('title', 'Untitled')}</h3>
-                <p class="listing-desc">{listing.get('description', 'No description')}</p>
-                <div class="listing-details">
-                    <p>👤 <strong>Posted by:</strong> {poster_name}</p>
-                    <p>📍 <strong>Location:</strong> {listing.get('location', 'Not specified')}</p>
-                    <p>💰 <strong>Price:</strong> {listing.get('price', 'Contact for price')}</p>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(listing_card(
+                listing.get('type', 'other'),
+                listing.get('status', 'available'),
+                listing.get('title', 'Untitled'),
+                listing.get('description', 'No description'),
+                poster_name,
+                listing.get('location', 'Not specified'),
+                listing.get('price', 'Contact for price')
+            ), unsafe_allow_html=True)
 
             if st.button("👋 I'm Interested", key=f"interest_{listing.get('id')}", use_container_width=True):
                 from src.data_manager import save_connection
@@ -168,8 +150,7 @@ else:
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Form to post new listing
-st.markdown("---")
+st.markdown("---")  # 📝 Post listing form
 st.subheader("📝 Post Your Own Listing")
 st.caption("Have something to sell or give away? List it here!")
 
@@ -192,11 +173,9 @@ with st.form("post_listing_form"):
     submit_button = st.form_submit_button("🚀 Post Listing", type="primary", use_container_width=True)
 
     if submit_button:
-        # Validate inputs
         if not title or not listing_type:
             st.error("⚠️ Please fill in all required fields (Title and Type)")
         else:
-            # Create listing data dictionary
             from src.data_manager import save_listing
             listing_data = {
                 "user_id": st.session_state.current_user.get('id'),
@@ -208,18 +187,15 @@ with st.form("post_listing_form"):
                 "status": "available"
             }
 
-            # Save the listing to CSV
             listing_id = save_listing(listing_data)
 
             st.success(f"✅ Listing '{title}' posted successfully! (ID: {listing_id})")
             st.balloons()
             st.info("💡 Your listing has been saved to the database and is now visible to other users.")
 
-            # Refresh the page to show the new listing
             st.rerun()
 
-# Campus resources section
-st.markdown("---")
+st.markdown("---")  # 🌟 Campus resources
 st.subheader("🌟 Campus Resources")
 st.caption("Quick access to IIT Delhi services")
 
