@@ -72,8 +72,6 @@ UniSync combines three powerful features:
 
 ## 🎓 Built For
 
-[Name of Hackathon] - January 2026
-
 **Solving real campus problems with AI-powered connections.**
 
 ---
