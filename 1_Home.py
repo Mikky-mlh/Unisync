@@ -51,6 +51,21 @@ with st.sidebar:
                     current_user = next((u for u in users if u.get('email', '').lower() == login_email.lower()), None)
                     if current_user:
                         st.session_state.current_user = current_user
+                        
+                        # Load user's connections from CSV
+                        from src.data_manager import get_user_connections
+                        connections = get_user_connections(current_user.get('id'))
+                        
+                        # Convert connections back to user objects for matches
+                        st.session_state.matches = []
+                        for conn in connections:
+                            # Figure out which user ID is the "other" person
+                            other_user_id = conn['user2_id'] if conn['user1_id'] == current_user.get('id') else conn['user1_id']
+                            # Find that user in the users list
+                            other_user = next((u for u in users if u.get('id') == other_user_id), None)
+                            if other_user and conn.get('connection_type') == 'peer_match':
+                                st.session_state.matches.append(other_user)
+                        
                         st.success(f"Welcome back, {current_user.get('name')}!")
                         st.rerun()
                     else:
@@ -304,8 +319,39 @@ if st.session_state.current_user:
                 </div>
                 """, unsafe_allow_html=True)
                 
-                if st.button(f"📧 Email {conn.get('name')}", key=f"email_{conn.get('id')}", use_container_width=True):
-                    st.info(f"mailto:{conn.get('email')}")
+                # Create a button that opens mailto link using JavaScript
+                import urllib.parse
+                subject = "UniSync Connection"
+                body = f"Hi {conn.get('name')},\n\nI connected with you on UniSync. Let's connect and collaborate!"
+
+                encoded_subject = urllib.parse.quote(subject)
+                encoded_body = urllib.parse.quote(body)
+
+                mailto_link = f"mailto:{conn.get('email')}?subject={encoded_subject}&body={encoded_body}"
+
+                # Display email as text
+                st.info(f"📧 Email: {conn.get('email')}")
+                
+                if st.button(f"⭐ Rate {conn.get('name')}", key=f"rate_{conn.get('id')}_{idx}", use_container_width=True):
+                    st.session_state[f'show_rating_form_{conn.get("id")}'] = True
+
+                # Show rating form if button clicked
+                if st.session_state.get(f'show_rating_form_{conn.get("id")}', False):
+                    with st.form(f"rate_form_{conn.get('id')}"):
+                        rating = st.slider("Rating (1-5 stars)", 1, 5, 5)
+                        review = st.text_area("Review (optional)", placeholder="How was your experience?")
+                        
+                        if st.form_submit_button("Submit Rating"):
+                            from src.data_manager import save_rating
+                            save_rating(
+                                st.session_state.current_user.get('id'),
+                                conn.get('id'),
+                                rating,
+                                review
+                            )
+                            st.success(f"✅ Rated {conn.get('name')} with {rating} stars!")
+                            st.session_state[f'show_rating_form_{conn.get("id")}'] = False
+                            st.rerun()
     else:
         st.info("👉 No connections yet. Start swiping in Find Peers to make connections!")
 

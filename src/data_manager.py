@@ -164,3 +164,57 @@ def get_user_connections(user_id):
     df = pd.read_csv("data/connections.csv")
     connections = df[(df['user1_id'] == user_id) | (df['user2_id'] == user_id)]
     return connections.to_dict('records')
+
+def save_rating(rater_id, rated_id, rating, review=""):
+    """Save a rating (1-5 stars) for a user"""
+    from datetime import datetime
+    
+    if not os.path.exists("data/ratings.csv"):
+        df = pd.DataFrame(columns=['rater_id', 'rated_id', 'rating', 'review', 'timestamp'])
+    else:
+        df = pd.read_csv("data/ratings.csv")
+    
+    # Check if user already rated this person (one rating per pair)
+    existing = df[(df['rater_id'] == rater_id) & (df['rated_id'] == rated_id)]
+    if not existing.empty:
+        # Update existing rating
+        df.loc[(df['rater_id'] == rater_id) & (df['rated_id'] == rated_id), 'rating'] = rating
+        df.loc[(df['rater_id'] == rater_id) & (df['rated_id'] == rated_id), 'review'] = review
+        df.loc[(df['rater_id'] == rater_id) & (df['rated_id'] == rated_id), 'timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    else:
+        # Add new rating
+        new_rating = {
+            'rater_id': rater_id,
+            'rated_id': rated_id,
+            'rating': rating,
+            'review': review,
+            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        df = pd.concat([df, pd.DataFrame([new_rating])], ignore_index=True)
+    
+    df.to_csv("data/ratings.csv", index=False)
+
+def get_user_rating(user_id):
+    """Get average rating for a user"""
+    if not os.path.exists("data/ratings.csv"):
+        return 0, 0  # (average rating, number of ratings)
+    
+    df = pd.read_csv("data/ratings.csv")
+    user_ratings = df[df['rated_id'] == user_id]
+    
+    if user_ratings.empty:
+        return 0, 0
+    
+    avg_rating = user_ratings['rating'].mean()
+    num_ratings = len(user_ratings)
+    
+    return round(avg_rating, 1), num_ratings
+
+def get_user_reviews(user_id):
+    """Get all reviews for a user"""
+    if not os.path.exists("data/ratings.csv"):
+        return []
+    
+    df = pd.read_csv("data/ratings.csv")
+    reviews = df[df['rated_id'] == user_id]
+    return reviews.to_dict('records')

@@ -1,6 +1,7 @@
 import streamlit as st
 import sys
 import os
+import streamlit.components.v1 as components  # Import components for JS execution
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -8,6 +9,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from src.data_manager import load_listings, load_users, save_listing
 import pandas as pd
 import re
+import urllib.parse
 
 # Initialize session state if not already done
 if 'current_user' not in st.session_state:
@@ -59,7 +61,6 @@ if listings:
             prices.append(0)
         else:
             # Extract numbers from price string
-            import re
             numbers = re.findall(r'\d+', price_str)
             if numbers:
                 prices.append(int(numbers[0]))
@@ -96,8 +97,6 @@ for listing in listings:
         price_val = 0
     else:
         # Extract numeric components from the price string.
-        # If a range like "$5-10" is detected, use the average of the first two numbers.
-        # Otherwise, fall back to the first numeric group.
         numbers = re.findall(r'\d+', price_str)
         if numbers:
             numbers = [int(n) for n in numbers]
@@ -105,9 +104,8 @@ for listing in listings:
                 price_val = int((numbers[0] + numbers[1]) / 2)
             else:
                 price_val = numbers[0]
-        numbers = re.findall(r'\d+', price_str)
-        if numbers:
-            price_val = int(numbers[0])
+        else:
+             price_val = 0
     
     # Check if price is within the slider range
     if price_val < price_range[0] or price_val > price_range[1]:
@@ -139,6 +137,7 @@ else:
             # Get the user who posted this listing
             poster_user = user_map.get(listing.get('user_id'))
             poster_name = poster_user.get('name', 'Anonymous') if poster_user else 'Unknown'
+            poster_email = poster_user.get('email', '') if poster_user else ''
 
             # Card container
             st.markdown(f"""
@@ -158,7 +157,15 @@ else:
             """, unsafe_allow_html=True)
 
             if st.button("👋 I'm Interested", key=f"interest_{listing.get('id')}", use_container_width=True):
-                st.success("✅ Interest registered! Contact info would be shown here.")
+                from src.data_manager import save_connection
+                save_connection(
+                    st.session_state.current_user.get('id'),
+                    listing.get('user_id'),
+                    f'dorm_interest_{listing.get("id")}'
+                )
+                st.success("✅ Interest saved!")
+                st.markdown(f'<a href="mailto:{poster_user.get("email")}">Click here to email {poster_name}</a>', unsafe_allow_html=True)
+
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Form to post new listing
@@ -167,57 +174,49 @@ st.subheader("📝 Post Your Own Listing")
 st.caption("Have something to sell or give away? List it here!")
 
 with st.form("post_listing_form"):
-        col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2)
 
-        with col1:
-            title = st.text_input("🏷️ Title *", placeholder="e.g., Study Desk with Chair")
-            listing_type = st.selectbox("📊 Type *", ["room", "furniture", "textbook", "electronics", "other"])
-            price = st.text_input("💰 Price", placeholder="e.g., ₹500 or Free")
+    with col1:
+        title = st.text_input("🏷️ Title *", placeholder="e.g., Study Desk with Chair")
+        listing_type = st.selectbox("📊 Type *", ["room", "furniture", "textbook", "electronics", "other"])
+        price = st.text_input("💰 Price", placeholder="e.g., ₹500 or Free")
 
-        with col2:
-            location = st.text_input("📍 Location", placeholder="e.g., Boys Hostel, Room 301")
-            contact = st.text_input("📧 Contact Email", value=st.session_state.current_user.get('email', ''), placeholder="your.email@iitd.ac.in")
+    with col2:
+        location = st.text_input("📍 Location", placeholder="e.g., Boys Hostel, Room 301")
+        contact = st.text_input("📧 Contact Email", value=st.session_state.current_user.get('email', ''), placeholder="your.email@iitd.ac.in")
 
-        description = st.text_area("📝 Description", placeholder="Describe your item, its condition, etc.", height=100)
+    description = st.text_area("📝 Description", placeholder="Describe your item, its condition, etc.", height=100)
 
-        st.caption("* Required fields")
+    st.caption("* Required fields")
 
-        submit_button = st.form_submit_button("🚀 Post Listing", type="primary", use_container_width=True)
+    submit_button = st.form_submit_button("🚀 Post Listing", type="primary", use_container_width=True)
 
-        if submit_button:
-            # Validate inputs
-            if not title or not listing_type:
-                st.error("⚠️ Please fill in all required fields (Title and Type)")
-            else:
-                # Create listing data dictionary
-                listing_data = {
-                    "user_id": st.session_state.current_user.get('id'),
-                    "type": listing_type,
-                    "title": title,
-                    "description": description if description else "No description provided",
-                    "location": location if location else "Location not specified",
-                    "price": price if price else "Price not specified",
-                    "status": "available"
-                }
+    if submit_button:
+        # Validate inputs
+        if not title or not listing_type:
+            st.error("⚠️ Please fill in all required fields (Title and Type)")
+        else:
+            # Create listing data dictionary
+            from src.data_manager import save_listing
+            listing_data = {
+                "user_id": st.session_state.current_user.get('id'),
+                "type": listing_type,
+                "title": title,
+                "description": description if description else "No description provided",
+                "location": location if location else "Location not specified",
+                "price": price if price else "Price not specified",
+                "status": "available"
+            }
 
-                # Save the listing to CSV
-                listing_id = save_listing(listing_data)
+            # Save the listing to CSV
+            listing_id = save_listing(listing_data)
 
-                st.success(f"✅ Listing '{title}' posted successfully! (ID: {listing_id})")
-                st.balloons()
-                st.info("💡 Your listing has been saved to the database and is now visible to other users.")
+            st.success(f"✅ Listing '{title}' posted successfully! (ID: {listing_id})")
+            st.balloons()
+            st.info("💡 Your listing has been saved to the database and is now visible to other users.")
 
-                # Refresh the page to show the new listing
-                st.rerun()
-
-                # Show preview of what was submitted
-                with st.expander("👁️ Preview Your Listing"):
-                    st.markdown(f"**Title:** {title}")
-                    st.markdown(f"**Type:** {listing_type}")
-                    st.markdown(f"**Price:** {price if price else 'Not specified'}")
-                    st.markdown(f"**Location:** {location if location else 'Not specified'}")
-                    st.markdown(f"**Description:** {description if description else 'No description'}")
-                    st.markdown(f"**Posted by:** {st.session_state.current_user.get('name', 'Current User')}")
+            # Refresh the page to show the new listing
+            st.rerun()
 
 # Campus resources section
 st.markdown("---")

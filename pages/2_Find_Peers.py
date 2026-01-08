@@ -1,13 +1,3 @@
-# File: 2_Find_Peers.py
-# Purpose: Tinder-style peer matching system with skill exchange
-# Assigned to: Yuvraj & Aaradhya
-# Deadline: Jan 9, 2024
-
-# Key Features:
-# - Swipe through user profiles to connect
-# - Track matches and viewed users
-# - Display skill exchange marketplace
-
 import streamlit as st
 import sys
 import os
@@ -139,6 +129,10 @@ else:
 
     user = available_users[st.session_state.current_user_index]
 
+    # Get user's rating
+    from src.data_manager import get_user_rating
+    avg_rating, num_ratings = get_user_rating(user.get('id'))
+
     # Center the user card
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
@@ -147,6 +141,9 @@ else:
         <div class="swipe-card">
             <div class="user-header">
                 <h3>{user.get('name', 'Unknown')}</h3>
+                <p style="color: #f59e0b; font-size: 1.2rem;">
+                    {'⭐' * int(avg_rating)} {avg_rating}/5.0 ({num_ratings} ratings)
+                </p>
             </div>
             <div class="user-details">
                 <p><strong>Major:</strong> {user.get('major', 'N/A')}</p>
@@ -171,7 +168,16 @@ else:
 
         with col_right:
             if st.button("👍 Connect", use_container_width=True, key=f"connect_{user.get('id')}"):
-                # Add user to matches and viewed_users
+                from src.data_manager import save_connection
+                
+                # Save connection to CSV (this makes it permanent)
+                save_connection(
+                    st.session_state.current_user.get('id'),
+                    user.get('id'),
+                    'peer_match'
+                )
+                
+                # Also add to session state for immediate display
                 st.session_state.matches.append(user)
                 st.session_state.viewed_users.append(user.get('id'))
                 st.session_state.current_user_index += 1
