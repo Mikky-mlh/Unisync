@@ -1,10 +1,10 @@
-def get_user_by_id(user_id, users):  # 🔍 Find user by ID
+def get_user_by_id(user_id, users):  # Find user by ID
     for user in users:
         if user.get('id') == user_id:
             return user
     return None
 
-def calculate_compatibility(user1, user2):  # 📊 Compatibility score
+def calculate_compatibility(user1, user2):  # Calculate compatibility score between two users
     score = 0
     if user1.get('major') == user2.get('major'):
         score += 30
@@ -22,5 +22,5 @@ def calculate_compatibility(user1, user2):  # 📊 Compatibility score
     
     return min(score, 100)
 
-def format_email_link(email):  # 📧 Create mailto link
+def format_email_link(email):  # Create mailto link
     return f'<a href="mailto:{email}">{email}</a>'

@@ -1,6 +1,6 @@
 import streamlit as st
 
-def user_card(user_data):  # 🎴 Display user card
+def user_card(user_data):  # Display user profile card
     st.markdown(f"""
     <div style="
         border: 2px solid #e0e0e0;
@@ -25,7 +25,7 @@ def user_card(user_data):  # 🎴 Display user card
     </div>
     """, unsafe_allow_html=True)
 
-def skill_card(skill_data, type="teach"):  # 🎯 Display skill card
+def skill_card(skill_data, type="teach"):  # Display skill card
     if type == "teach":
         st.markdown(f"""
         <div style="

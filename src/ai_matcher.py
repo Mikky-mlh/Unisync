@@ -1,7 +1,7 @@
 import google.generativeai as genai
 import streamlit as st
 
-@st.cache_data(ttl=300)  # 💾 Cache for 5 mins
+@st.cache_data(ttl=300)  # Cache results for 5 minutes
 def ai_assistant(query, users, listings):
     import csv
     
@@ -25,7 +25,7 @@ def ai_assistant(query, users, listings):
     except:
         ratings_str = "No ratings available"
     
-    prompt = f"""You are Uni-Sync AI, a smart campus matchmaking assistant at IIT Delhi.  # 🤖 AI prompt
+    prompt = f"""You are Uni-Sync AI, a smart campus matchmaking assistant at IIT Delhi.  # Build AI prompt
 
 Student query: "{query}"
 
@@ -67,7 +67,7 @@ Format:
 Keep it under 300 words but be SPECIFIC with names and reasons.
 """
     
-    try:  # 🚀 Call Gemini API
+    try:  # Call Gemini API
         api_key = st.secrets.get("GEMINI_API_KEY")
         if not api_key:
             return "⚠️ AI features require API key. Please configure GEMINI_API_KEY in secrets."
