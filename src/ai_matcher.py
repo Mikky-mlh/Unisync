@@ -1,6 +1,18 @@
 import google.generativeai as genai
 import streamlit as st
 
+if 'api_key_index' not in st.session_state:
+    st.session_state.api_key_index = 0
+
+def get_next_api_key():
+    keys = [st.secrets.get(f"GEMINI_API_KEY_{i}") for i in range(1, 11)]
+    keys = [k for k in keys if k]
+    if not keys:
+        return None
+    key = keys[st.session_state.api_key_index % len(keys)]
+    st.session_state.api_key_index += 1
+    return key
+
 @st.cache_data(ttl=300)  # Cache results for 5 minutes
 def ai_assistant(query, users, listings):
     import csv
@@ -67,15 +79,20 @@ Format:
 Keep it under 300 words but be SPECIFIC with names and reasons.
 """
     
-    try:  # Call Gemini API
-        api_key = st.secrets.get("GEMINI_API_KEY")
-        if not api_key:
-            return "⚠️ AI features require API key. Please configure GEMINI_API_KEY in secrets."
-        
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-flash-latest')  # Use latest model
-        response = model.generate_content(prompt)
-        return response.text
-        
-    except Exception as e:
-        return f"⚠️ AI is temporarily unavailable: {str(e)}"
+    max_retries = 10
+    for attempt in range(max_retries):
+        try:
+            api_key = get_next_api_key()
+            if not api_key:
+                return "⚠️ AI features require API key. Please configure GEMINI_API_KEY in secrets."
+            
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('gemini-flash-latest')
+            response = model.generate_content(prompt)
+            return response.text
+            
+        except Exception as e:
+            if "quota" in str(e).lower() or "rate" in str(e).lower():
+                if attempt < max_retries - 1:
+                    continue
+            return f"⚠️ AI is temporarily unavailable: {str(e)}"

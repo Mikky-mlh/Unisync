@@ -40,6 +40,8 @@ if 'ai_chat_history' not in st.session_state:
     st.session_state.ai_chat_history = []
 if 'user_query_key' not in st.session_state:
     st.session_state.user_query_key = 0
+if 'api_key_index' not in st.session_state:
+    st.session_state.api_key_index = 0
 
 # Load custom CSS
 try:
