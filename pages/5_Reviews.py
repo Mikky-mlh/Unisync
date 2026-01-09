@@ -11,7 +11,7 @@ st.set_page_config(page_title="Reviews", page_icon="⭐", layout="wide")  # Conf
 try:
     with open("assets/style-review.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-except:
+except FileNotFoundError:
     pass
 
 with st.sidebar:

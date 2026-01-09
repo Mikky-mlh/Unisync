@@ -22,7 +22,7 @@ if 'current_user' not in st.session_state or st.session_state.current_user is No
 try:
     with open("assets/style-dorm.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-except:
+except FileNotFoundError:
     pass
 
 with st.sidebar:

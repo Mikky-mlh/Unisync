@@ -18,7 +18,7 @@ if 'current_user' not in st.session_state or st.session_state.current_user is No
 try:
     with open("assets/style-peer.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-except:
+except FileNotFoundError:
     pass
 
 with st.sidebar:
@@ -61,47 +61,58 @@ all_interests = set()
 
 for user in users:
     if user.get("skills"):
-        skills = [s.strip() for s in user.get("skills", "").split(",")]
-        all_skills.update(skills)
+        all_skills.update(s.strip() for s in user.get("skills", "").split(",") if s.strip())
     if user.get("interests"):
-        interests = [i.strip() for i in user.get("interests", "").split(",")]
-        all_interests.update(interests)
+        all_interests.update(i.strip() for i in user.get("interests", "").split(",") if i.strip())
 
 selected_skills = st.sidebar.multiselect("🛠️ Filter by Skills", sorted(all_skills))
 selected_interests = st.sidebar.multiselect("❤️ Filter by Interests", sorted(all_interests))
 
 search_query = st.sidebar.text_input("🔍 Search by name or keywords")  # Search input
 
-def filter_users(users, major_filter, year_filter, skills_filter, interests_filter, search_query):  # Apply all filters
+def _is_current_user(user):
+    return user.get('id') == st.session_state.current_user.get('id')
+
+def _matches_major(user, major_filter):
+    return major_filter == "All" or user.get("major") == major_filter
+
+def _matches_year(user, year_filter):
+    return year_filter == "All" or user.get("year") == year_filter
+
+def _matches_skills(user, skills_filter):
+    if not skills_filter:
+        return True
+    user_skills = [s.strip() for s in user.get("skills", "").split(",") if s.strip()]
+    return any(skill in user_skills for skill in skills_filter)
+
+def _matches_interests(user, interests_filter):
+    if not interests_filter:
+        return True
+    user_interests = [i.strip() for i in user.get("interests", "").split(",") if i.strip()]
+    return any(interest in user_interests for interest in interests_filter)
+
+def _matches_search(user, search_query):
+    if not search_query:
+        return True
+    search_text = f"{user.get('name', '')} {user.get('major', '')} {user.get('skills', '')} {user.get('interests', '')}".lower()
+    return search_query.lower() in search_text
+
+def filter_users(users, major_filter, year_filter, skills_filter, interests_filter, search_query):
     filtered = []
-
     for user in users:
-        if user.get('id') == st.session_state.current_user.get('id'):
+        if _is_current_user(user):
             continue
-
-        if major_filter != "All" and user.get("major") != major_filter:
+        if not _matches_major(user, major_filter):
             continue
-
-        if year_filter != "All" and user.get("year") != year_filter:
+        if not _matches_year(user, year_filter):
             continue
-
-        if skills_filter:
-            user_skills = [s.strip() for s in user.get("skills", "").split(",") if s.strip()]
-            if not any(skill in user_skills for skill in skills_filter):
-                continue
-
-        if interests_filter:
-            user_interests = [i.strip() for i in user.get("interests", "").split(",") if i.strip()]
-            if not any(interest in user_interests for interest in interests_filter):
-                continue
-
-        if search_query:
-            search_text = f"{user.get('name', '')} {user.get('major', '')} {user.get('skills', '')} {user.get('interests', '')}".lower()
-            if search_query.lower() not in search_text:
-                continue
-
+        if not _matches_skills(user, skills_filter):
+            continue
+        if not _matches_interests(user, interests_filter):
+            continue
+        if not _matches_search(user, search_query):
+            continue
         filtered.append(user)
-
     return filtered
 
 filtered_users = filter_users(users, selected_major, selected_year, selected_skills, selected_interests, search_query)  # Get filtered results

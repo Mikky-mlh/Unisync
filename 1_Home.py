@@ -6,6 +6,7 @@ init_data()  # Initialize data files if they don't exist
 import json
 from streamlit_lottie import st_lottie
 import urllib.parse
+import html
 
 st.set_page_config(  # Configure page settings
     page_title="Uni-Sync - Connect & Collaborate",
@@ -149,12 +150,12 @@ with st.sidebar:
             margin-bottom: 1rem;
             backdrop-filter: blur(10px);
         ">
-            <h4 style="margin: 0; color: #fff !important;">👋 {current_user.get('name')}</h4>
+            <h4 style="margin: 0; color: #fff !important;">👋 {html.escape(current_user.get('name'))}</h4>
             <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #a1a1aa !important;">
-                🎓 {current_user.get('major', 'Student')}
+                🎓 {html.escape(current_user.get('major', 'Student'))}
             </p>
             <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #71717a !important;">
-                ✨ {current_user.get('x_factor', '')}
+                ✨ {html.escape(current_user.get('x_factor', ''))}
             </p>
         </div>
         """, unsafe_allow_html=True)
