@@ -3,24 +3,25 @@ import sys
 import os
 from datetime import datetime, timedelta
 import random
+import urllib.parse
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))  # 📂 Path fix
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))  # Add parent directory to path
 
 from src.data_manager import load_users
 
-st.set_page_config(  # 🎨 Setup
+st.set_page_config(  # Configure page settings
     page_title="Skill Swap - Uni-Sync",
     page_icon="🔄",
     layout="wide"
 )
 
-try:  # 🎨 Load styling
+try:  # Load custom CSS
     with open("assets/style-skill.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 except:
     pass
 
-# 🎴 Skill card builder
+# Helper function to create skill card HTML
 def skill_card(cat, skill_category, skill_level, type_emoji, skill_name, skill_description, skill_user, type_label):
     return f"""<div style="background: rgba(30, 30, 45, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 3px solid {cat['color']}; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem;">
 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
@@ -31,7 +32,7 @@ def skill_card(cat, skill_category, skill_level, type_emoji, skill_name, skill_d
 <div style="display: flex; justify-content: space-between; padding-top: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
 <span style="color: #71717a !important; font-size: 0.85rem;">👤 {skill_user} • {type_label}</span></div></div>"""
 
-if 'current_user' not in st.session_state or st.session_state.current_user is None:  # 🔒 Auth check
+if 'current_user' not in st.session_state or st.session_state.current_user is None:  # Check authentication
     st.markdown("""
     <div style="
         text-align: center;
@@ -49,10 +50,10 @@ if 'current_user' not in st.session_state or st.session_state.current_user is No
     """, unsafe_allow_html=True)
     st.stop()
 
-users = load_users()  # 📄 Load data
+users = load_users()  # Load all users
 current_user = st.session_state.current_user
 
-# 💾 Initialize skill swap data
+# Initialize skill offerings in session state
 if 'skill_offerings' not in st.session_state:
     st.session_state.skill_offerings = []
     
@@ -124,14 +125,14 @@ if 'recent_exchanges' not in st.session_state:
         {"user1": "Karan Mehta", "user2": "Priya Reddy", "skill1": "Guitar", "skill2": "Android development", "time": "1 day ago"},
     ]
 
-# 🎯 Header
+# Page header
 st.markdown("""
 <div style="text-align: center; margin-bottom: 0.5rem;">
-    <h1>🔄 Skill Swap</h1>
+    <h1><span class="emoji-fix">🔄</span> Skill Swap</h1>
 </div>
 """, unsafe_allow_html=True)
 
-# 🚀 Hero section
+# Hero section with description
 st.markdown("""
 <div class="hero-swap">
     <div class="hero-icon">🔄</div>
@@ -143,7 +144,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 📊 Calculate stats
+# Calculate and display statistics
 total_skills = len(st.session_state.skill_offerings)
 skills_to_teach = len([s for s in st.session_state.skill_offerings if s['type'] == 'teach'])
 skills_to_learn = len([s for s in st.session_state.skill_offerings if s['type'] == 'learn'])
@@ -175,7 +176,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 🤔 How it works
+# How it works section
 st.markdown("""
 <div class="how-it-works">
     <div class="section-header">
@@ -205,7 +206,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("---")  # ➕ Add skill form
+st.markdown("---")  # Section divider
 
 col1, col2 = st.columns([1, 1])
 
@@ -326,7 +327,7 @@ with col2:
         </div>
         """, unsafe_allow_html=True)
 
-st.markdown("---")  # 🔍 Browse skills
+st.markdown("---")  # Browse skills section
 
 st.markdown("""
 <div class="section-header">
@@ -335,7 +336,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-filter_col1, filter_col2, filter_col3 = st.columns([1, 1, 1])  # 🎛️ Filters
+filter_col1, filter_col2, filter_col3 = st.columns([1, 1, 1])  # Filter controls
 
 with filter_col1:
     filter_type = st.selectbox("Filter by Type", ["All", "Teaching", "Learning"], key="filter_type")
@@ -350,7 +351,7 @@ with filter_col2:
 with filter_col3:
     search_query = st.text_input("🔍 Search Skills", placeholder="Search...", key="search_skills")
 
-filtered_skills = st.session_state.skill_offerings.copy()  # ⚙️ Apply filters
+filtered_skills = st.session_state.skill_offerings.copy()  # Start with all skills
 
 if filter_type != "All":
     type_value = "teach" if filter_type == "Teaching" else "learn"
@@ -372,7 +373,7 @@ if filter_category != "All":
 if search_query:
     filtered_skills = [s for s in filtered_skills if search_query.lower() in s['skill'].lower() or search_query.lower() in s['description'].lower()]
 
-if filtered_skills:  # 📦 Display skills
+if filtered_skills:  # Display filtered skills
     # Group by category for display
     skill_cols = st.columns(3)
     
@@ -407,10 +408,17 @@ if filtered_skills:  # 📦 Display skills
             
             if skill['user'] != current_user.get('name'):
                 user_email = skill.get('email', '')
-                if st.button(f"🤝 Connect", key=f"connect_{idx}", use_container_width=True):
-                    if user_email:
-                        st.success(f"✉️ Contact {skill['user']} at {user_email} to learn '{skill['skill']}'!")
-                    else:
+                if user_email:
+                    import urllib.parse
+                    subject = f"UniSync: Interested in learning {skill['skill']}"
+                    body = f"Hi {skill['user']},\n\nI found your skill listing on UniSync and I'm interested in learning {skill['skill']}.\n\nLet's connect!\n\nBest regards,\n{current_user.get('name')}"
+                    mailto_link = f"mailto:{user_email}?subject={urllib.parse.quote(subject)}&body={urllib.parse.quote(body)}"
+                    
+                    if st.button(f"📧 Contact {skill['user']}", key=f"contact_{idx}", use_container_width=True):
+                        st.markdown(f'<meta http-equiv="refresh" content="0; url={mailto_link}">', unsafe_allow_html=True)
+                        st.success(f"✉️ Opening email to {skill['user']}...")
+                else:
+                    if st.button(f"🤝 Connect", key=f"connect_{idx}", use_container_width=True):
                         st.success(f"Request sent to {skill['user']}! They'll be notified about your interest in '{skill['skill']}'")
 else:
     st.markdown("""
@@ -427,7 +435,7 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
-st.markdown("---")  # 🔥 Trending skills
+st.markdown("---")  # Section divider
 
 st.markdown("""
 <div class="trending-section">
@@ -440,7 +448,7 @@ st.markdown("""
 
 trend_col1, trend_col2, trend_col3 = st.columns(3)
 
-tech_skills = [s for s in st.session_state.skill_offerings if s['category'] == 'tech']  # 💻 Tech
+tech_skills = [s for s in st.session_state.skill_offerings if s['category'] == 'tech']  # Filter tech skills
 with trend_col1:
     st.markdown("""
     <div class="column tech">
@@ -467,7 +475,7 @@ with trend_col1:
 
     st.markdown("</ul></div>", unsafe_allow_html=True)
 
-creative_skills = [s for s in st.session_state.skill_offerings if s['category'] in ['art', 'music']]  # 🎨 Creative
+creative_skills = [s for s in st.session_state.skill_offerings if s['category'] in ['art', 'music']]  # Filter creative skills
 with trend_col2:
     st.markdown("""
     <div class="column creative">
@@ -494,7 +502,7 @@ with trend_col2:
 
     st.markdown("</ul></div>", unsafe_allow_html=True)
 
-academic_skills = [s for s in st.session_state.skill_offerings if s['category'] in ['academic', 'language']]  # 📚 Academic
+academic_skills = [s for s in st.session_state.skill_offerings if s['category'] in ['academic', 'language']]  # Filter academic skills
 with trend_col3:
     st.markdown("""
     <div class="column academic">
@@ -521,7 +529,7 @@ with trend_col3:
 
     st.markdown("</ul></div>", unsafe_allow_html=True)
 
-st.markdown("---")  # 🤝 Recent exchanges
+st.markdown("---")  # Section divider
 
 st.markdown("""
 <div class="recent-exchanges">
@@ -550,7 +558,7 @@ for exchange in st.session_state.recent_exchanges:
 
 st.markdown("</div></div>", unsafe_allow_html=True)
 
-st.markdown("---")  # ⚡ Quick match
+st.markdown("---")  # Section divider
 
 st.markdown("""
 <div style="
@@ -608,7 +616,7 @@ with col_match2:
         else:
             st.info("No matches available yet. Be the first to add more skills!")
 
-# 👣 Footer
+# Footer
 st.markdown("""
 <div class="footer">
     <p>🔄 Skill Swap • Share Knowledge, Grow Together • Uni-Sync Platform</p>

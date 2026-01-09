@@ -1,9 +1,3 @@
-/* ===================================
-   UNI-SYNC REVIEWS - MODERN DARK THEME
-   Version 2.0 - Star Rating Edition
-   =================================== */
-
-/* CSS Variables - Consistent with other pages */
 :root {
     /* Colors */
     --bg-primary: #0a0a0f;
@@ -79,9 +73,7 @@
     --transition-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-/* ===================================
-   BASE STYLES
-   =================================== */
+/* Base Styles */
 
 .stApp {
     background: var(--bg-primary) !important;
@@ -108,9 +100,7 @@ p, span, div, li, label {
     color: var(--text-secondary) !important;
 }
 
-/* ===================================
-   PAGE TITLE
-   =================================== */
+/* Page Title */
 
 h1 {
     background: var(--gradient-star) !important;
@@ -166,9 +156,7 @@ h1::after {
     }
 }
 
-/* ===================================
-   HERO SECTION (Optional Header Area)
-   =================================== */
+/* Hero Section */
 
 .hero-reviews {
     background: var(--bg-card);
@@ -209,9 +197,7 @@ h1::after {
     50% { transform: translate(-50%, -55%) rotate(15deg); }
 }
 
-/* ===================================
-   EXPANDER STYLING (User Reviews Container)
-   =================================== */
+/* Expander Styling */
 
 /* Expander Header */
 .streamlit-expanderHeader {
@@ -286,9 +272,7 @@ h1::after {
     }
 }
 
-/* ===================================
-   AVERAGE RATING DISPLAY
-   =================================== */
+/* Average Rating Display */
 
 .avg-rating {
     background: linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, rgba(245, 158, 11, 0.08) 100%);
@@ -327,9 +311,7 @@ h1::after {
     text-align: center;
 }
 
-/* ===================================
-   STAR RATING STYLING
-   =================================== */
+/* Star Rating */
 
 /* Make stars golden and glowing */
 .streamlit-expanderContent p,
@@ -354,9 +336,7 @@ strong {
     font-size: 1.1rem;
 }
 
-/* ===================================
-   INDIVIDUAL REVIEW CARDS
-   =================================== */
+/* Individual Review Cards */
 
 .review-card {
     background: var(--bg-card);
@@ -411,9 +391,7 @@ strong {
     opacity: 1;
 }
 
-/* ===================================
-   REVIEW CONTENT STYLING
-   =================================== */
+/* Review Content */
 
 /* Markdown content in expander */
 .streamlit-expanderContent .stMarkdown {
@@ -485,9 +463,7 @@ strong {
     border-left: 2px solid rgba(251, 191, 36, 0.3);
 }
 
-/* ===================================
-   REVIEW DIVIDERS
-   =================================== */
+/* Review Dividers */
 
 .streamlit-expanderContent hr {
     border: none !important;
@@ -514,9 +490,7 @@ strong {
     opacity: 0.6;
 }
 
-/* ===================================
-   RATING BADGE STYLES
-   =================================== */
+/* Rating Badge Styles */
 
 .rating-badge {
     display: inline-flex;
@@ -558,9 +532,7 @@ strong {
     color: var(--rating-1) !important;
 }
 
-/* ===================================
-   STAR ANIMATION
-   =================================== */
+/* Star Animation */
 
 .star-animated {
     display: inline-block;
@@ -594,9 +566,7 @@ strong {
     transition: var(--transition-fast);
 }
 
-/* ===================================
-   EMPTY STATE
-   =================================== */
+/* Empty State */
 
 .empty-state {
     text-align: center;
@@ -629,9 +599,7 @@ strong {
     font-size: 0.95rem;
 }
 
-/* ===================================
-   ALERTS & MESSAGES
-   =================================== */
+/* Alerts & Messages */
 
 .stSuccess {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.08) 100%) !important;
@@ -669,9 +637,7 @@ strong {
     }
 }
 
-/* ===================================
-   SIDEBAR STYLING
-   =================================== */
+/* Sidebar */
 
 [data-testid="stSidebar"] {
     background: var(--bg-secondary) !important;
@@ -694,9 +660,7 @@ strong {
     margin: 1.5rem 0 !important;
 }
 
-/* ===================================
-   BUTTONS
-   =================================== */
+/* Buttons */
 
 .stButton > button {
     background: var(--gradient-star) !important;
@@ -734,46 +698,76 @@ strong {
     left: 100%;
 }
 
-/* ===================================
-   SCROLLBAR
-   =================================== */
-
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--bg-secondary);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--gradient-star);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--star-gold);
-}
+/* Scrollbar - Universal Fix */
 
 * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--star-gold) var(--bg-secondary);
+    scrollbar-width: thin !important;
+    scrollbar-color: var(--star-gold) var(--bg-secondary) !important;
 }
 
-/* ===================================
-   LOADING SPINNER
-   =================================== */
+html, body {
+    scrollbar-width: thin !important;
+    scrollbar-color: var(--star-gold) var(--bg-primary) !important;
+}
+
+::-webkit-scrollbar,
+*::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    margin: 2px;
+}
+
+::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb {
+    background: var(--gradient-star);
+    border-radius: 10px;
+    border: 2px solid var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:hover {
+    background: var(--star-gold);
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+}
+
+::-webkit-scrollbar-corner {
+    background: var(--bg-secondary);
+}
+
+/* Loading Spinner */
 
 .stSpinner > div {
     border-color: var(--star-gold) !important;
     border-right-color: transparent !important;
 }
 
-/* ===================================
-   METRICS (If used for stats)
-   =================================== */
+/* Streamlit Main Block Scrollbar */
+[data-testid="stMainBlockContainer"] {
+    scrollbar-width: thin;
+    scrollbar-color: var(--star-gold) var(--bg-primary);
+}
+
+[data-testid="stMainBlockContainer"]::-webkit-scrollbar {
+    width: 12px;
+}
+
+[data-testid="stMainBlockContainer"]::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+[data-testid="stMainBlockContainer"]::-webkit-scrollbar-thumb {
+    background: var(--gradient-star);
+    border-radius: 10px;
+    border: 3px solid var(--bg-primary);
+}
+
+/* Metrics */
 
 [data-testid="stMetric"] {
     background: var(--bg-card) !important;
@@ -821,9 +815,7 @@ strong {
     background-clip: text;
 }
 
-/* ===================================
-   RATING SUMMARY CARD
-   =================================== */
+/* Rating Summary Card */
 
 .rating-summary {
     background: var(--gradient-card);
@@ -908,9 +900,7 @@ strong {
     color: var(--text-muted) !important;
 }
 
-/* ===================================
-   FLOATING DECORATIONS
-   =================================== */
+/* Floating Decorations */
 
 .stApp::before {
     content: '';
@@ -985,9 +975,7 @@ strong {
     }
 }
 
-/* ===================================
-   RESPONSIVE DESIGN
-   =================================== */
+/* Responsive Design */
 
 @media (max-width: 768px) {
     h1 {
@@ -1036,9 +1024,7 @@ strong {
     }
 }
 
-/* ===================================
-   ANIMATION UTILITIES
-   =================================== */
+/* Animation Utilities */
 
 .fade-in {
     animation: fadeIn 0.5s ease-out;
@@ -1084,9 +1070,7 @@ strong {
     }
 }
 
-/* ===================================
-   TOOLTIP STYLES
-   =================================== */
+/* Tooltip Styles */
 
 [data-tooltip] {
     position: relative;
@@ -1118,9 +1102,7 @@ strong {
     visibility: visible;
 }
 
-/* ===================================
-   VERIFIED BADGE
-   =================================== */
+/* Verified Badge */
 
 .verified-badge {
     display: inline-flex;
@@ -1142,9 +1124,7 @@ strong {
     font-weight: 700;
 }
 
-/* ===================================
-   FOOTER
-   =================================== */
+/* Footer */
 
 .footer {
     text-align: center;
@@ -1158,9 +1138,7 @@ strong {
     font-size: 0.9rem;
 }
 
-/* ===================================
-   PRINT STYLES
-   =================================== */
+/* Print Styles */
 
 @media print {
     .stApp {
