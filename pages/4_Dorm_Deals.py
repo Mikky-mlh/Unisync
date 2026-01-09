@@ -3,7 +3,7 @@ import sys
 import os
 import streamlit.components.v1 as components  # Import components for JS execution
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))  # 📂 Path fix
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))  # Add parent directory to path
 
 from src.data_manager import load_listings, load_users, save_listing
 import pandas as pd
@@ -13,19 +13,69 @@ import urllib.parse
 if 'current_user' not in st.session_state:
     st.session_state.current_user = None
 
-st.set_page_config(page_title="Dorm Deals", page_icon="🏢", layout="wide")  # 🎨 Setup
+st.set_page_config(page_title="Dorm Deals", page_icon="🏢", layout="wide")  # Configure page
 
-if 'current_user' not in st.session_state or st.session_state.current_user is None:  # 🔒 Auth check
+if 'current_user' not in st.session_state or st.session_state.current_user is None:  # Check authentication
     st.warning("🔒 Please login from the Home page to access Dorm Deals")
     st.stop()
 
-try:  # 🎨 Load styling
+try:  # Load custom CSS
     with open("assets/style-dorm.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 except:
     pass
 
-# 🎴 Listing card builder
+# JavaScript to force scrollbar styling
+st.markdown("""
+<style id="custom-scrollbar">
+.custom-scroll::-webkit-scrollbar {
+    width: 12px !important;
+}
+.custom-scroll::-webkit-scrollbar-track {
+    background: #0a0a0f !important;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #14b8a6, #06b6d4) !important;
+    border-radius: 10px !important;
+    border: 3px solid #0a0a0f !important;
+}
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+    background: #14b8a6 !important;
+    box-shadow: 0 0 10px rgba(20, 184, 166, 0.5) !important;
+}
+</style>
+
+<script>
+(function() {
+    function applyScrollbar() {
+        const selectors = [
+            '[data-testid="stAppViewContainer"]',
+            '[data-testid="stMain"]',
+            '.main',
+            'section.main',
+            '[data-testid="stVerticalBlock"]',
+            'body',
+            'html'
+        ];
+        
+        selectors.forEach(selector => {
+            document.querySelectorAll(selector).forEach(el => {
+                el.classList.add('custom-scroll');
+            });
+        });
+    }
+    
+    applyScrollbar();
+    setTimeout(applyScrollbar, 500);
+    setTimeout(applyScrollbar, 1500);
+    
+    const observer = new MutationObserver(applyScrollbar);
+    observer.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+""", unsafe_allow_html=True)
+
+# Helper function to create listing card HTML
 def listing_card(listing_type, listing_status, title, description, poster_name, location, price):
     return f"""<div class="listing-card">
 <div class="listing-header">
@@ -38,24 +88,24 @@ def listing_card(listing_type, listing_status, title, description, poster_name, 
 <p>📍 <strong>Location:</strong> {location}</p>
 <p>💰 <strong>Price:</strong> {price}</p></div></div>"""
 
-st.title("🏢 Dorm Deals")  # 🎯 Header
+st.title("🏢 Dorm Deals")  # Page title
 st.markdown("### Your campus marketplace for rooms, furniture, and resources")
 st.caption("💡 Find great deals or post items you want to sell/give away")
 
-listings = load_listings()  # 📄 Load data
+listings = load_listings()  # Load all listings
 users = load_users()
 
-user_map = {}  # 🗺️ User mapping
+user_map = {}  # Create user ID to user object mapping
 for user in users:
     user_map[user['id']] = user
 
-st.sidebar.title("🔍 Filters")  # 🎛️ Sidebar filters
+st.sidebar.title("🔍 Filters")  # Sidebar filters section
 st.sidebar.caption("Narrow down your search")
 
-type_options = ["All", "room", "furniture", "textbook", "electronics", "other"]  # 🏷️ Filter options
+type_options = ["All", "room", "furniture", "textbook", "electronics", "other"]  # Available filter options
 selected_type = st.sidebar.selectbox("🏷️ Item Type", type_options)
 
-if listings:  # 💰 Price range
+if listings:  # Calculate price range from listings
     prices = []
     for l in listings:
         price_str = str(l.get('price', '0'))
@@ -74,20 +124,20 @@ if listings:  # 💰 Price range
 else:
     price_range = (0, 1000)
 
-location_search = st.sidebar.text_input("📍 Location", placeholder="e.g., Dorm B")  # 📍 Location
+location_search = st.sidebar.text_input("📍 Location", placeholder="e.g., Dorm B")  # Location filter
 
-free_only = st.sidebar.checkbox("✅ Free items only")  # 🆓 Free filter
+free_only = st.sidebar.checkbox("✅ Free items only")  # Free items filter
 
 st.sidebar.markdown("---")
 st.sidebar.info(f"📊 Showing {len(listings)} listings")
 
-filtered_listings = []  # ⚙️ Filter logic
+filtered_listings = []  # Apply all filters
 
 for listing in listings:
     if selected_type != "All" and listing.get('type', '').lower() != selected_type.lower():
         continue
 
-    price_str = str(listing.get('price', '0'))  # 💵 Price filter
+    price_str = str(listing.get('price', '0'))  # Extract price value
     price_val = 0
 
     if 'free' in price_str.lower():
@@ -105,17 +155,17 @@ for listing in listings:
     if price_val < price_range[0] or price_val > price_range[1]:
         continue
 
-    if location_search:  # 📍 Location filter
+    if location_search:  # Filter by location
         loc = str(listing.get('location', '')).lower()
         if location_search.lower() not in loc:
             continue
 
-    if free_only and price_val != 0:  # 🆓 Free only
+    if free_only and price_val != 0:  # Filter free items only
         continue
 
     filtered_listings.append(listing)
 
-st.subheader("📦 Available Listings")  # 📦 Display listings
+st.subheader("📦 Available Listings")  # Display listings section
 
 if not filtered_listings:
     st.warning("😕 No listings match your filters.")
@@ -145,12 +195,20 @@ else:
                     listing.get('user_id'),
                     f'dorm_interest_{listing.get("id")}'
                 )
-                st.success("✅ Interest saved!")
-                st.markdown(f'<a href="mailto:{poster_user.get("email")}">Click here to email {poster_name}</a>', unsafe_allow_html=True)
+                
+                if poster_email:
+                    subject = f"UniSync: Interested in {listing.get('title')}"
+                    body = f"Hi {poster_name},\n\nI saw your listing '{listing.get('title')}' on UniSync Dorm Deals and I'm interested!\n\nDetails:\n- Item: {listing.get('title')}\n- Price: {listing.get('price')}\n- Location: {listing.get('location')}\n\nLet's connect!\n\nBest regards,\n{st.session_state.current_user.get('name')}\nEmail: {st.session_state.current_user.get('email')}"
+                    mailto_link = f"mailto:{poster_email}?subject={urllib.parse.quote(subject)}&body={urllib.parse.quote(body)}"
+                    
+                    st.markdown(f'<meta http-equiv="refresh" content="0; url={mailto_link}">', unsafe_allow_html=True)
+                    st.success(f"✅ Interest saved! Opening email to {poster_name}...")
+                else:
+                    st.success("✅ Interest saved!")
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown("---")  # 📝 Post listing form
+st.markdown("---")  # Section divider
 st.subheader("📝 Post Your Own Listing")
 st.caption("Have something to sell or give away? List it here!")
 
@@ -195,7 +253,7 @@ with st.form("post_listing_form"):
 
             st.rerun()
 
-st.markdown("---")  # 🌟 Campus resources
+st.markdown("---")  # Section divider
 st.subheader("🌟 Campus Resources")
 st.caption("Quick access to IIT Delhi services")
 
