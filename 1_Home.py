@@ -2,19 +2,19 @@ import streamlit as st
 from src.data_manager import load_users, load_listings, init_data, save_user, verify_password, save_password
 from src.ai_matcher import ai_assistant
 
-init_data()  # 🚀 Bootstrap the data files
+init_data()  # Initialize data files if they don't exist
 import json
 from streamlit_lottie import st_lottie
 import urllib.parse
 
-st.set_page_config(  # 🎨 Setup page
+st.set_page_config(  # Configure page settings
     page_title="Uni-Sync - Connect & Collaborate",
     page_icon="🤝",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# 📌 Lock sidebar open
+# Keep sidebar visible
 st.markdown("""
 <style>
     /* Prevent sidebar from being collapsible */
@@ -33,7 +33,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 💾 Session state setup
+# Initialize session state
 if 'current_user' not in st.session_state:
     st.session_state.current_user = None
 if 'ai_chat_history' not in st.session_state:
@@ -41,14 +41,14 @@ if 'ai_chat_history' not in st.session_state:
 if 'user_query_key' not in st.session_state:
     st.session_state.user_query_key = 0
 
-# 🎨 Load styling
+# Load custom CSS
 try:
     with open("assets/style-home.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 except FileNotFoundError:
     pass
 
-# 🔧 Sidebar tweaks
+# Additional sidebar styling
 st.markdown("""
 <style>
     /* Ensure sidebar stays open */
@@ -67,9 +67,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="particles-bg"></div>', unsafe_allow_html=True)  # ✨ Fancy background
+st.markdown('<div class="particles-bg"></div>', unsafe_allow_html=True)  # Animated background
 
-# 👤 SIDEBAR - User Profile
+# SIDEBAR - User Profile
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/476/476863.png", width=80)
     st.markdown("### 👤 User Profile")
@@ -91,7 +91,7 @@ with st.sidebar:
                         from src.data_manager import get_user_connections
                         connections = get_user_connections(current_user.get('id'))
                         
-                        st.session_state.matches = []  # 🔗 Load existing connections
+                        st.session_state.matches = []  # Load existing connections
                         for conn in connections:
                             other_user_id = conn['user2_id'] if conn['user1_id'] == current_user.get('id') else conn['user1_id']
                             other_user = next((u for u in users if u.get('id') == other_user_id), None)
@@ -107,7 +107,7 @@ with st.sidebar:
     else:
         current_user = st.session_state.current_user
         
-# 🎴 Profile card
+# Display user profile card
         st.markdown(f"""
         <div style="
             background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(6, 182, 212, 0.1) 100%);
@@ -132,7 +132,7 @@ with st.sidebar:
         
     st.divider()
     
-    with st.expander("📝 New? Join UniSync", expanded=False):  # 🆕 Signup form
+    with st.expander("📝 New? Join UniSync", expanded=False):  # Signup form
         x_factor_type = st.radio(
             "Can you teach something?", 
             ["Yes, I can teach", "Currently a learner only"],
@@ -211,7 +211,7 @@ with st.sidebar:
                         st.success("✅ Welcome to UniSync!")
                         st.balloons()
     
-    if st.session_state.current_user is not None:  # ✏️ Edit Profile
+    if st.session_state.current_user is not None:  # Edit Profile section
         st.divider()
         with st.expander("✏️ Edit Profile"):
             current_user = st.session_state.current_user
@@ -244,16 +244,38 @@ with st.sidebar:
                     else:
                         st.success("✅ Profile updated!")
 
-# 🏠 MAIN CONTENT
+# MAIN CONTENT
 
 st.markdown('<div class="main-content">', unsafe_allow_html=True)
 
-col1, col2 = st.columns([2, 1])  # 🎯 Hero section
+# Guide link - accessible without login
+st.markdown("""
+<div style="
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 16px;
+">
+    <span style="font-size: 1.5rem;">📖</span>
+    <p style="color: #a1a1aa !important; margin: 0.5rem 0;">New to Uni-Sync? Learn how to use all features!</p>
+</div>
+""", unsafe_allow_html=True)
+
+col_guide1, col_guide2, col_guide3 = st.columns([1, 1, 1])
+with col_guide2:
+    if st.button("📖 View User Guide", use_container_width=True, type="primary"):
+        st.switch_page("pages/6_Guide.py")
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+col1, col2 = st.columns([2, 1])  # Hero section layout
 
 with col1:
     st.markdown('''
     <div class="hero-section">
-        <h1 class="hero-title">🤝 Uni-Sync</h1>
+        <h1 class="hero-title"><span class="emoji-fix">🤝</span> Uni-Sync</h1>
         <p class="hero-subtitle">One campus. Endless connections.</p>
         <p class="hero-description">
             Connect with fellow students, share skills, and find study partners. 
@@ -263,7 +285,7 @@ with col1:
     </div>
     ''', unsafe_allow_html=True)
 
-    users = load_users()  # 📊 Stats
+    users = load_users()  # Load user data for stats
     listings = load_listings()
 
     st.markdown('<div class="stats-spacer"></div>', unsafe_allow_html=True)
@@ -311,9 +333,9 @@ with col2:
         </div>
         ''', unsafe_allow_html=True)
 
-st.markdown('<hr class="section-divider">', unsafe_allow_html=True)  # ➖ Divider
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)  # Visual divider
 
-# 🤖 AI Chatbot
+# AI Chatbot section
 st.markdown('''
 <h2 class="section-title">🤖 AI Campus Assistant</h2>
 <p class="section-description">
@@ -347,7 +369,7 @@ if submit_button and user_query and user_query.strip():
             ai_response = ai_assistant(user_query, users, listings)
             st.session_state.ai_chat_history.append({"role": "assistant", "content": ai_response})
 
-if st.session_state.ai_chat_history:  # 💬 Chat history
+if st.session_state.ai_chat_history:  # Display chat history
     st.markdown("---")
     for chat in st.session_state.ai_chat_history[-6:]:
         if chat["role"] == "user":
@@ -363,7 +385,7 @@ if st.session_state.ai_chat_history:  # 💬 Chat history
             </div>
             ''', unsafe_allow_html=True)
 
-if st.session_state.current_user:  # 🤝 My Connections
+if st.session_state.current_user:  # Show user connections
     st.markdown("---")
     st.markdown('<h2 class="section-title">🤝 My Connections</h2>', unsafe_allow_html=True)
     
@@ -457,9 +479,9 @@ if st.session_state.current_user:  # 🤝 My Connections
         </div>
         ''', unsafe_allow_html=True)
 
-st.markdown('</div>', unsafe_allow_html=True)  # 🔚 Close wrapper
+st.markdown('</div>', unsafe_allow_html=True)  # Close main content wrapper
 
-# 👣 Footer
+# Footer
 st.markdown('''
 <footer>
     <p>Made with ❤️ for the university community | <strong>Uni-Sync</strong> © 2024</p>
