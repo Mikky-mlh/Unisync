@@ -16,3 +16,4 @@ user1_id,user2_id,connection_type,timestamp
 2,7,peer_match,2026-01-09 13:56:25
 1,2,dorm_interest_1,2026-01-09 14:09:05
 1,1,dorm_interest_2,2026-01-09 19:56:27
+1,2,dorm_interest_1,2026-01-09 22:09:09
