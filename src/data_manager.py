@@ -1,5 +1,9 @@
 import pandas as pd
 import os
+import hashlib
+
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
 
 def init_data():  # Initialize data files if they don't exist
     
@@ -99,14 +103,14 @@ def save_password(email, password):  # Save password to CSV
     else:
         df = pd.DataFrame(columns=['email', 'password'])
     
-    new_entry = pd.DataFrame([{'email': email, 'password': password}])
+    new_entry = pd.DataFrame([{'email': email, 'password': hash_password(password)}])
     df = pd.concat([df, new_entry], ignore_index=True)
     df.to_csv("data/passwords.csv", index=False)
 
 def verify_password(email, password):  # Verify login credentials
     passwords = load_passwords()
     for entry in passwords:
-        if entry.get('email', '').lower() == email.lower() and entry.get('password') == password:
+        if entry.get('email', '').lower() == email.lower() and entry.get('password') == hash_password(password):
             return True
     return False
 
