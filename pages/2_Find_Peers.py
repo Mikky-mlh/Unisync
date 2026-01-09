@@ -15,11 +15,16 @@ if 'current_user' not in st.session_state or st.session_state.current_user is No
     st.warning("🔒 Please login from the Home page to access Find Peers")
     st.stop()
 
-try:  # Load custom CSS
+try:
     with open("assets/style-peer.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 except:
     pass
+
+with st.sidebar:
+    col_s1, col_s2, col_s3 = st.columns([1, 3, 1])
+    with col_s2:
+        st.image("assets/logo.png", width=120)
 
 # Initialize session state variables
 if 'viewed_users' not in st.session_state:

@@ -19,11 +19,16 @@ if 'current_user' not in st.session_state or st.session_state.current_user is No
     st.warning("🔒 Please login from the Home page to access Dorm Deals")
     st.stop()
 
-try:  # Load custom CSS
+try:
     with open("assets/style-dorm.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 except:
     pass
+
+with st.sidebar:
+    col_s1, col_s2, col_s3 = st.columns([1, 3, 1])
+    with col_s2:
+        st.image("assets/logo.png", width=120)
 
 # JavaScript to force scrollbar styling
 st.markdown("""
@@ -88,18 +93,25 @@ def listing_card(listing_type, listing_status, title, description, poster_name, 
 <p>📍 <strong>Location:</strong> {location}</p>
 <p>💰 <strong>Price:</strong> {price}</p></div></div>"""
 
-st.title("🏢 Dorm Deals")  # Page title
+st.markdown("""
+<div style="text-align: center; margin-bottom: 0.5rem;">
+    <h1><span class="emoji-fix">🏢</span> Dorm Deals</h1>
+</div>
+""", unsafe_allow_html=True)
+
 st.markdown("### Your campus marketplace for rooms, furniture, and resources")
 st.caption("💡 Find great deals or post items you want to sell/give away")
 
-listings = load_listings()  # Load all listings
+listings = load_listings()
 users = load_users()
 
-user_map = {}  # Create user ID to user object mapping
+user_map = {}
 for user in users:
     user_map[user['id']] = user
 
-st.sidebar.title("🔍 Filters")  # Sidebar filters section
+st.sidebar.markdown("""
+<h3><span class="emoji-fix">🔍</span> Filters</h3>
+""", unsafe_allow_html=True)
 st.sidebar.caption("Narrow down your search")
 
 type_options = ["All", "room", "furniture", "textbook", "electronics", "other"]  # Available filter options

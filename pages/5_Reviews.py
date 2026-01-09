@@ -8,11 +8,16 @@ from src.data_manager import load_users, get_user_reviews
 
 st.set_page_config(page_title="Reviews", page_icon="⭐", layout="wide")  # Configure page
 
-try:  # Load custom CSS
+try:
     with open("assets/style-review.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 except:
     pass
+
+with st.sidebar:
+    col_s1, col_s2, col_s3 = st.columns([1, 3, 1])
+    with col_s2:
+        st.image("assets/logo.png", width=120)
 
 # JavaScript to force scrollbar styling
 st.markdown("""
@@ -64,16 +69,21 @@ st.markdown("""
 </script>
 """, unsafe_allow_html=True)
 
-if 'current_user' not in st.session_state or st.session_state.current_user is None:  # Check authentication
+if 'current_user' not in st.session_state or st.session_state.current_user is None:
     st.warning("🔒 Please login to see reviews")
     st.stop()
 
-st.title("⭐ User Reviews")  # Page title
+st.markdown("""
+<div style="text-align: center; margin-bottom: 0.5rem;">
+    <h1><span class="emoji-fix">⭐</span> User Reviews</h1>
+</div>
+""", unsafe_allow_html=True)
 
-users = load_users()  # Load all users
+users = load_users()
 
-# Sidebar filters
-st.sidebar.title("🔍 Filter & Sort")
+st.sidebar.markdown("""
+<h3><span class="emoji-fix">🔍</span> Filter & Sort</h3>
+""", unsafe_allow_html=True)
 st.sidebar.caption("Refine your search")
 
 min_rating = st.sidebar.slider("⭐ Minimum Rating", 1, 5, 1)

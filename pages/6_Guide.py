@@ -8,6 +8,11 @@ try:
 except:
     pass
 
+with st.sidebar:
+    col_s1, col_s2, col_s3 = st.columns([1, 3, 1])
+    with col_s2:
+        st.image("assets/logo.png", width=120)
+
 st.markdown("""
 <div style="text-align: center; margin-bottom: 0.5rem;">
     <h1><span class="emoji-fix">📖</span> Uni-Sync User Guide</h1>

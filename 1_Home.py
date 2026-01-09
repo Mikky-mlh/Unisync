@@ -1,7 +1,7 @@
 import streamlit as st
 from src.data_manager import load_users, load_listings, init_data, save_user, verify_password, save_password
 from src.ai_matcher import ai_assistant
-
+import os
 init_data()  # Initialize data files if they don't exist
 import json
 from streamlit_lottie import st_lottie
@@ -69,11 +69,16 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="particles-bg"></div>', unsafe_allow_html=True)  # Animated background
+st.markdown('<div class="particles-bg"></div>', unsafe_allow_html=True)
 
-# SIDEBAR - User Profile
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    st.image("assets/logo.png", width=400)
+
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/476/476863.png", width=80)
+    col_s1, col_s2, col_s3 = st.columns([1, 3, 1])
+    with col_s2:
+        st.image("assets/logo.png", width=120)
     st.markdown("### 👤 User Profile")
     
     users = load_users()
@@ -112,11 +117,12 @@ with st.sidebar:
 # Display user profile card
         st.markdown(f"""
         <div style="
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(6, 182, 212, 0.1) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, rgba(26, 35, 126, 0.4) 0%, rgba(0, 229, 255, 0.1) 100%);
+            border: 1px solid rgba(0, 229, 255, 0.2);
             border-radius: 16px;
             padding: 1.25rem;
             margin-bottom: 1rem;
+            backdrop-filter: blur(10px);
         ">
             <h4 style="margin: 0; color: #fff !important;">👋 {current_user.get('name')}</h4>
             <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #a1a1aa !important;">

@@ -915,6 +915,54 @@ a[href^="mailto:"]:hover {
     background-clip: text;
 }
 
+/* Logo styling */
+.logo-container {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+}
+
+.logo-container a {
+    display: inline-block;
+    text-decoration: none;
+}
+
+.logo-container img {
+    max-width: 300px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 4px 12px rgba(139, 92, 246, 0.3));
+}
+
+.logo-container img:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 8px 24px rgba(139, 92, 246, 0.5));
+}
+
+/* Sidebar logo styling */
+[data-testid="stSidebar"] .sidebar-logo {
+    text-align: center;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+}
+
+[data-testid="stSidebar"] .sidebar-logo a {
+    display: inline-block;
+    text-decoration: none;
+}
+
+[data-testid="stSidebar"] .sidebar-logo img {
+    max-width: 120px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 2px 8px rgba(139, 92, 246, 0.2));
+}
+
+[data-testid="stSidebar"] .sidebar-logo img:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 4px 16px rgba(139, 92, 246, 0.4));
+}
+
 /* Glass card utility */
 .glass-card {
     background: var(--bg-glass);

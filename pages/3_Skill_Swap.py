@@ -15,11 +15,16 @@ st.set_page_config(  # Configure page settings
     layout="wide"
 )
 
-try:  # Load custom CSS
+try:
     with open("assets/style-skill.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 except:
     pass
+
+with st.sidebar:
+    col_s1, col_s2, col_s3 = st.columns([1, 3, 1])
+    with col_s2:
+        st.image("assets/logo.png", width=120)
 
 # Helper function to create skill card HTML
 def skill_card(cat, skill_category, skill_level, type_emoji, skill_name, skill_description, skill_user, type_label):
