@@ -1,5 +1,5 @@
 import streamlit as st
-from src.data_manager import load_users, load_listings, init_data, save_user, verify_password, save_password
+from src.data_manager import load_users, load_listings, init_data, save_user, verify_password, save_password, reset_password
 from src.ai_matcher import ai_assistant
 import os
 init_data()  # Initialize data files if they don't exist
@@ -42,6 +42,8 @@ if 'user_query_key' not in st.session_state:
     st.session_state.user_query_key = 0
 if 'api_key_index' not in st.session_state:
     st.session_state.api_key_index = 0
+if 'show_reset_form' not in st.session_state:
+    st.session_state.show_reset_form = False
 
 # Load custom CSS
 try:
@@ -111,6 +113,29 @@ with st.sidebar:
                         st.error("⚠️ User not found")
                 else:
                     st.error("⚠️ Invalid email or password")
+        
+        if st.button("🔓 Forgot Password?", use_container_width=True):
+            st.session_state.show_reset_form = not st.session_state.show_reset_form
+        
+        if st.session_state.show_reset_form:
+            with st.form("reset_password_form"):
+                reset_email = st.text_input("Email", placeholder="your.email@campus.edu")
+                new_password = st.text_input("New Password", type="password")
+                confirm_password = st.text_input("Confirm Password", type="password")
+                
+                if st.form_submit_button("🔄 Reset Password", type="primary", use_container_width=True):
+                    if not reset_email or not new_password or not confirm_password:
+                        st.error("⚠️ All fields required")
+                    elif new_password != confirm_password:
+                        st.error("⚠️ Passwords do not match")
+                    elif len(new_password) < 6:
+                        st.error("⚠️ Password must be at least 6 characters")
+                    elif reset_password(reset_email, new_password):
+                        st.success("✅ Password reset successful!")
+                        st.session_state.show_reset_form = False
+                        st.rerun()
+                    else:
+                        st.error("⚠️ Email not found")
     else:
         current_user = st.session_state.current_user
         

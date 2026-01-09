@@ -211,10 +211,6 @@ __marimo__/
 .env
 secrets.toml
 
-# --- YOUR DATA FILES ---
-data/
-*.csv
-
 # --- OS JUNK ---
 .DS_Store
 Thumbs.db

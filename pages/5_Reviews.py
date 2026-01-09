@@ -99,9 +99,6 @@ st.sidebar.markdown("---")
 # Collect user data with reviews
 user_data = []
 for user in users:
-    if user.get('id') == st.session_state.current_user.get('id'):
-        continue
-    
     reviews = get_user_reviews(user.get('id'))
     
     if reviews:

@@ -114,6 +114,17 @@ def verify_password(email, password):  # Verify login credentials
             return True
     return False
 
+def reset_password(email, new_password):  # Reset password for existing user
+    if not os.path.exists("data/passwords.csv"):
+        return False
+    
+    df = pd.read_csv("data/passwords.csv")
+    if email.lower() in df['email'].str.lower().values:
+        df.loc[df['email'].str.lower() == email.lower(), 'password'] = hash_password(new_password)
+        df.to_csv("data/passwords.csv", index=False)
+        return True
+    return False
+
 def save_connection(user1_id, user2_id, connection_type):  # Save connection to CSV
     import pandas as pd
     from datetime import datetime

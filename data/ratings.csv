@@ -1,0 +1,32 @@
+rater_id,rated_id,rating,review,timestamp
+1,3,5,"Aaradhya helped me understand ML concepts brilliantly! Her research background really shows.",2026-01-08 18:02:38
+1,2,5,"Siddhika's presentation skills workshop was amazing. Very engaging and practical!",2026-01-08 18:26:11
+2,1,4,"Yuvraj taught me Python basics in record time. Great teacher and very patient!",2026-01-08 22:11:13
+3,1,5,"Best Python tutor ever! Made complex concepts super easy to understand.",2026-01-08 22:11:13
+4,5,5,"Priya's Android development session was incredibly helpful. Highly recommend!",2026-01-08 22:11:13
+5,7,3,"Ananya's CAD tutorial was okay, but could use more practical examples.",2026-01-08 22:11:13
+7,1,5,"Yuvraj is an excellent mentor. His Python teaching style is unmatched!",2026-01-08 22:11:13
+8,1,3,"Yuvraj knows his stuff but the pace was a bit too fast for me.",2026-01-08 22:11:13
+9,1,5,"Yuvraj made Python fun and easy to learn. Great experience!",2026-01-08 22:11:13
+10,11,4,"Neha's AutoCAD basics course was very informative and practical.",2026-01-08 22:11:13
+11,10,5,"Vikram's project management insights were invaluable. Great mentor!",2026-01-08 22:11:13
+12,8,3,"Karan's embedded systems workshop was good but a bit rushed.",2026-01-08 22:11:13
+13,5,4,"Priya's Java basics session helped me a lot with my coursework.",2026-01-08 22:11:13
+14,2,4,"Siddhika's Figma design tutorial was creative and well-explained.",2026-01-08 22:11:13
+15,3,4,"Aaradhya's data visualization techniques are top-notch. Learned a lot!",2026-01-08 22:11:13
+2,14,3,"Arjun's MATLAB session was decent but needed more hands-on practice.",2026-01-08 22:11:13
+3,11,4,"Neha's technical drawing skills are impressive. Great learning experience!",2026-01-08 22:11:13
+4,7,4,"Ananya's 3D modeling tutorial was exactly what I needed. Very talented!",2026-01-08 22:11:13
+6,4,4,"Rohan's calculus tutoring helped me ace my exam. Very knowledgeable!",2026-01-08 22:11:13
+7,5,5,"Priya's Android app development course exceeded my expectations!",2026-01-08 22:11:13
+8,9,3,"Diya's chemistry lab techniques were okay, expected more depth.",2026-01-08 22:11:13
+9,8,4,"Karan's guitar lessons were fun and easy to follow. Great teacher!",2026-01-08 22:11:13
+10,2,4,"Siddhika's public speaking tips really boosted my confidence!",2026-01-08 22:11:13
+11,1,4,"Yuvraj's Python course was well-paced and covered all the basics perfectly.",2026-01-08 22:11:13
+12,1,3,"Good content from Yuvraj but I needed more time to practice.",2026-01-08 22:11:13
+13,7,3,"Ananya's robotics session was interesting but felt a bit basic.",2026-01-08 22:11:13
+14,1,4,"Yuvraj's teaching methodology is excellent. Made learning Python enjoyable!",2026-01-08 22:11:13
+15,10,4,"Vikram's photography tips were practical and improved my skills significantly.",2026-01-08 22:11:13
+6,1,3,"Yuvraj's session was informative but could be more interactive.",2026-01-08 22:11:13
+4,2,3,"Siddhika's presentation was good but lacked some advanced techniques.",2026-01-08 22:11:13
+5,3,3,"Aaradhya's ML explanation was solid but moved too quickly for beginners.",2026-01-08 22:11:13
