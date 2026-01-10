@@ -264,6 +264,8 @@ MIT License - see [LICENSE](LICENSE) file
 
 <div align="center">
 
+<img src="assets/codeclan.png" width="200px" alt="Code Clan Logo"/>
+
 <table>
   <tr>
     <td align="center">
