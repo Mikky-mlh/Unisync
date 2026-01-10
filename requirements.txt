@@ -5,4 +5,4 @@ google-generativeai
 Pillow
 plotly
 python-dotenv
-faker  # To generate fake users for the demo
+faker
